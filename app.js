@@ -25,11 +25,18 @@ function renderLoginScreen() {
     </div>
   `;
 
-  document.getElementById('loginBtn').onclick = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    console.log("Giriş işlemi başlatıldı");
-    auth.signInWithRedirect(provider);
-  };
+ document.getElementById('loginBtn').onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(result => {
+      console.log("Popup ile giriş başarılı:", result.user);
+      setupChatUI(result.user);
+    })
+    .catch(error => {
+      console.error("Popup hatası:", error);
+    });
+};
+
 }
 
 // Sohbet Ekranı
