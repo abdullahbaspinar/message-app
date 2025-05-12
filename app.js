@@ -3,7 +3,7 @@ const firebaseConfig = {
   authDomain: "message-app-e45fa.firebaseapp.com",
   databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
   projectId: "message-app-e45fa",
-  storageBucket: "message-app-e45fa.firebasestorage.app",
+  storageBucket: "message-app-e45fa.appspot.com",
   messagingSenderId: "1090017668550",
   appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
 };
@@ -12,8 +12,26 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-renderLoginScreen();
+// 👉 Oturumu SESSION yap, her sayfa açıldığında kontrol etsin
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .then(() => {
+    console.log("Session persistence aktif.");
+    // Sadece burada Login ekranı yükle
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        console.log("Oturum açık:", user.displayName);
+        setupChatUI(user);
+      } else {
+        console.log("Oturum kapalı, giriş ekranı gösteriliyor.");
+        renderLoginScreen();
+      }
+    });
+  })
+  .catch(error => {
+    console.error("Persistence hatası:", error);
+  });
 
+// Login Ekranı
 function renderLoginScreen() {
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -28,15 +46,7 @@ function renderLoginScreen() {
   };
 }
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("Kullanıcı oturumda:", user.displayName);
-    setupChatUI(user);
-  } else {
-    renderLoginScreen();
-  }
-});
-
+// Sohbet Arayüzü
 function setupChatUI(user) {
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -53,13 +63,11 @@ function setupChatUI(user) {
   const messageInput = document.getElementById('messageInput');
   const chatHeader = document.getElementById('chatHeader');
 
-  // ✅ Kullanıcıyı kaydet ve sonra listeyi yükle
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid,
     photoURL: user.photoURL || ""
   }).then(() => {
-    // Kullanıcı listesi yalnızca kayıt tamamlandıktan sonra dinleniyor
     db.ref('users').on('value', snapshot => {
       userList.innerHTML = '';
       snapshot.forEach(child => {
@@ -107,11 +115,3 @@ function setupChatUI(user) {
     };
   }
 }
-auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-  .then(() => {
-    console.log("Persistence SESSION olarak ayarlandı.");
-    renderLoginScreen();
-  })
-  .catch((error) => {
-    console.error("Persistence ayarlanırken hata oluştu:", error);
-  });
