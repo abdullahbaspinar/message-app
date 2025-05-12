@@ -1,22 +1,20 @@
-// SDK bağlantıları zaten index.html'de <script src="...firebase-app-compat.js"> ile geldiği için
-// burada yeniden import etmeye gerek yok. Aşağıdaki firebaseConfig ile devam edebiliriz:
-
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
   authDomain: "message-app-e45fa.firebaseapp.com",
   databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
   projectId: "message-app-e45fa",
-  storageBucket: "message-app-e45fa.appspot.com", // .app değil, .com olmalı
+  storageBucket: "message-app-e45fa.appspot.com", // .app değil .com olmalı
   messagingSenderId: "1090017668550",
   appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
 };
 
-// ✅ Firebase başlat
+// Firebase Başlat
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// 🔐 Giriş Ekranı
+// Başlangıçta Giriş Ekranı Göster
 document.getElementById('app').innerHTML = `
   <div class="login-container">
     <h1>Mesajlaşma Uygulaması</h1>
@@ -24,19 +22,27 @@ document.getElementById('app').innerHTML = `
   </div>
 `;
 
+// Giriş Butonu Olayı
 document.getElementById('loginBtn').onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithRedirect(provider);
 };
 
-// 🔁 Redirect sonucu kontrol
+// Redirect Sonuçlarını Dinle
 auth.getRedirectResult().then(result => {
   if (result.user) {
     setupChatUI(result.user);
   }
 });
 
-// 🟢 Sohbet arayüzü
+// Oturum Açık mı Kontrol Et (Yedek Kontrol)
+auth.onAuthStateChanged(user => {
+  if (user) {
+    setupChatUI(user);
+  }
+});
+
+// Ana Sohbet Arayüzü
 function setupChatUI(user) {
   document.body.innerHTML = `<div id="app"></div>`;
   document.getElementById('app').innerHTML = `
@@ -51,13 +57,13 @@ function setupChatUI(user) {
   const messagesEl = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
 
-  // 🔐 Kullanıcıyı veritabanına ekle
+  // Kullanıcıyı Listeye Kaydet
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid
   });
 
-  // 👥 Kullanıcı listesini getir
+  // Tüm Kullanıcıları Listele
   db.ref('users').on('value', snapshot => {
     userList.innerHTML = '';
     snapshot.forEach(child => {
@@ -72,12 +78,13 @@ function setupChatUI(user) {
     });
   });
 
-  // 💬 Sohbeti başlat
+  // Sohbet Aç
   function openChat(otherUid, myUid, otherName) {
     messagesEl.innerHTML = '';
     const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
     const chatRef = db.ref('chats/' + chatId);
 
+    // Mesajları Dinle
     chatRef.on('child_added', snapshot => {
       const msg = snapshot.val();
       const p = document.createElement('p');
@@ -86,6 +93,7 @@ function setupChatUI(user) {
       messagesEl.scrollTop = messagesEl.scrollHeight;
     });
 
+    // Mesaj Gönderme
     messageInput.onkeypress = e => {
       if (e.key === 'Enter' && messageInput.value.trim() !== '') {
         chatRef.push({
