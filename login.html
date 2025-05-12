@@ -3,23 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Giriş Yap</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
 </head>
 <body>
-  <div class="form-container">
-    <h1>Mesajlaşma Uygulamasına Giriş Yap</h1>
-    <input id="email" type="email" placeholder="E-posta adresiniz">
-    <input id="password" type="password" placeholder="Şifreniz">
-    <button onclick="login()">Giriş Yap</button>
-    <div class="form-links">
-      <a href="register.html">Hesabınız yok mu? Kayıt Ol</a>
-      <a href="reset.html">Şifremi Unuttum</a>
-    </div>
-  </div>
+  <h1>Giriş Yap</h1>
+  <input id="email" type="email" placeholder="E-posta"><br>
+  <input id="password" type="password" placeholder="Şifre"><br>
+  <button onclick="login()">Giriş Yap</button>
+  <p><a href="register.html">Kayıt Ol</a></p>
+  <p><a href="reset.html">Şifremi Unuttum</a></p>
 
   <script>
     function login() {
