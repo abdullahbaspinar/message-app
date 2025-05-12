@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mesajlaşma</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+</head>
+<body>
+  <h1>Mesajlaşma Ekranı</h1>
+  <button onclick="logout()">Çıkış Yap</button>
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Mesaj yazın..." />
+
+  <script>
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        const messagesEl = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const chatRef = db.ref('chats/global');
+
+        chatRef.on('child_added', snapshot => {
+          const msg = snapshot.val();
+          const p = document.createElement('p');
+          p.textContent = msg.sender + ': ' + msg.text;
+          messagesEl.appendChild(p);
+        });
+
+        messageInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter' && messageInput.value.trim() !== '') {
+            chatRef.push({
+              sender: user.email,
+              text: messageInput.value.trim()
+            });
+            messageInput.value = '';
+          }
+        });
+      }
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = 'login.html';
+      });
+    }
+  </script>
+</body>
+</html>

@@ -2,15 +2,22 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mesajlaşma Uygulaması - Email Giriş</title>
+  <title>Giriş Yap</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script src="app.js"></script>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="app.js"></script>
+  <div class="container">
+    <h1>Giriş Yap</h1>
+    <input id="email" type="email" placeholder="E-posta"><br>
+    <input id="password" type="password" placeholder="Şifre"><br>
+    <button onclick="login()">Giriş Yap</button>
+    <a href="register.html">Kayıt Ol</a>
+    <a href="reset.html">Şifremi Unuttum</a>
+  </div>
 </body>
 </html>

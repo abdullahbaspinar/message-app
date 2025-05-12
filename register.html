@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kayıt Ol</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
+</head>
+<body>
+  <h1>Kayıt Ol</h1>
+  <input id="email" type="email" placeholder="E-posta"><br>
+  <input id="password" type="password" placeholder="Şifre"><br>
+  <button onclick="register()">Kayıt Ol</button>
+  <p><a href="login.html">Giriş Yap</a></p>
+
+  <script>
+    function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => window.location.href = 'chat.html')
+        .catch(e => alert(e.message));
+    }
+  </script>
+</body>
+</html>
