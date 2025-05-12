@@ -15,7 +15,10 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 document.getElementById('app').innerHTML = `
-  <button id="loginBtn">Google ile Giriş Yap</button>
+  <div class="login-container">
+    <h1>Mesajlaşma Uygulaması</h1>
+    <button id="loginBtn">Google ile Giriş Yap</button>
+  </div>
 `;
 
 document.getElementById('loginBtn').onclick = () => {
@@ -27,6 +30,7 @@ document.getElementById('loginBtn').onclick = () => {
 };
 
 function setupChatUI(user) {
+  document.body.innerHTML = `<div id="app"></div>`;
   document.getElementById('app').innerHTML = `
     <div class="sidebar" id="userList"></div>
     <div class="chat-area">
@@ -39,13 +43,11 @@ function setupChatUI(user) {
   const messagesEl = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
 
-  // Kullanıcı adı ekle veya güncelle
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid
   });
 
-  // Kullanıcı listesi dinle
   db.ref('users').on('value', snapshot => {
     userList.innerHTML = '';
     snapshot.forEach(child => {

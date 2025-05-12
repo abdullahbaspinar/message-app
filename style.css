@@ -1,32 +1,75 @@
-body {
+* {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+}
+
+body, html {
+  height: 100%;
   font-family: Arial, sans-serif;
-}
-#app {
   display: flex;
-  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background: #f0f0f0;
 }
+
+.login-container {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-container h1 {
+  margin-bottom: 20px;
+}
+
+#loginBtn {
+  padding: 10px 20px;
+  background: #25D366;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#loginBtn:hover {
+  background: #1DA851;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
 .sidebar {
   width: 30%;
   background: #f0f0f0;
   border-right: 1px solid #ccc;
   overflow-y: auto;
 }
+
 .chat-area {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .user {
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid #ddd;
 }
+
 .messages {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
 }
+
 input {
   width: 100%;
   padding: 10px;
