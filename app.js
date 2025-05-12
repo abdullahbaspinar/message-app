@@ -9,11 +9,12 @@ const firebaseConfig = {
   // measurementId: "YOUR_MEASUREMENT_ID", // Optional: Only included if Google Analytics is enabled
 };
 
-firebase.initializeApp(firebaseConfig);
 
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
+// 🔐 Redirect tabanlı giriş
 document.getElementById('app').innerHTML = `
   <div class="login-container">
     <h1>Mesajlaşma Uygulaması</h1>
@@ -23,12 +24,17 @@ document.getElementById('app').innerHTML = `
 
 document.getElementById('loginBtn').onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).then(result => {
-    const user = result.user;
-    setupChatUI(user);
-  });
+  auth.signInWithRedirect(provider);
 };
 
+// 🔁 Redirect sonucu kontrol
+auth.getRedirectResult().then(result => {
+  if (result.user) {
+    setupChatUI(result.user);
+  }
+});
+
+// 🟢 Giriş sonrası sohbet arayüzü
 function setupChatUI(user) {
   document.body.innerHTML = `<div id="app"></div>`;
   document.getElementById('app').innerHTML = `
@@ -43,11 +49,13 @@ function setupChatUI(user) {
   const messagesEl = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
 
+  // 🧑 Kullanıcıyı Firebase'e ekle
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid
   });
 
+  // 📜 Kullanıcı listesini yükle
   db.ref('users').on('value', snapshot => {
     userList.innerHTML = '';
     snapshot.forEach(child => {
@@ -62,6 +70,7 @@ function setupChatUI(user) {
     });
   });
 
+  // 💬 Sohbet başlat
   function openChat(otherUid, myUid, otherName) {
     messagesEl.innerHTML = '';
     const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
