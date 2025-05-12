@@ -10,33 +10,36 @@
   <script src="firebase.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="sidebar" id="userList">
+  <div class="chat-container">
+    <div class="sidebar">
       <div class="profile">
         <h2>Mesajlaşma</h2>
-        <button onclick="logout()">Çıkış Yap</button>
+        <button onclick="logout()">Çıkış</button>
       </div>
-      <div id="userListContainer"></div>
+      <div id="userListContainer" class="user-list"></div>
     </div>
 
     <div class="chat-area">
-      <div class="chat-header" id="chatHeader">Sohbet Seçin</div>
+      <div class="chat-header" id="chatHeader">Sohbet seçin</div>
       <div class="messages" id="messages"></div>
       <div class="message-input">
         <input type="text" id="messageInput" placeholder="Mesaj yazın..." disabled>
+        <button id="sendButton" disabled>Gönder</button>
       </div>
     </div>
   </div>
 
   <script>
+    const sendButton = document.getElementById('sendButton');
+    const messageInput = document.getElementById('messageInput');
+    const messagesEl = document.getElementById('messages');
+    const chatHeader = document.getElementById('chatHeader');
+
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = 'index.html';
       } else {
         const userListContainer = document.getElementById('userListContainer');
-        const chatHeader = document.getElementById('chatHeader');
-        const messagesEl = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
 
         db.ref('users/' + user.uid).set({
           email: user.email,
@@ -61,6 +64,7 @@
           messagesEl.innerHTML = '';
           chatHeader.textContent = "Sohbet: " + otherEmail;
           messageInput.disabled = false;
+          sendButton.disabled = false;
           const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
           const chatRef = db.ref('chats/' + chatId);
 
@@ -69,27 +73,21 @@
             const msg = snapshot.val();
             const p = document.createElement('p');
             p.textContent = msg.text;
-
-            // Mesajın sahibi kim kontrolü
-            if (msg.sender === user.email) {
-              p.classList.add('sent');
-            } else {
-              p.classList.add('received');
-            }
-
+            p.className = msg.sender === user.email ? 'sent' : 'received';
             messagesEl.appendChild(p);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           });
 
-          messageInput.onkeypress = e => {
-            if (e.key === 'Enter' && messageInput.value.trim() !== '') {
-              chatRef.push({
-                sender: user.email,
-                text: messageInput.value.trim()
-              });
+          sendButton.onclick = sendMessage;
+          messageInput.onkeypress = e => { if (e.key === 'Enter') sendMessage(); };
+
+          function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text !== '') {
+              chatRef.push({ sender: user.email, text });
               messageInput.value = '';
             }
-          };
+          }
         }
       }
     });
