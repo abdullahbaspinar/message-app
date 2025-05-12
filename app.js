@@ -53,28 +53,30 @@ function setupChatUI(user) {
   const messageInput = document.getElementById('messageInput');
   const chatHeader = document.getElementById('chatHeader');
 
+  // ✅ Kullanıcıyı kaydet ve sonra listeyi yükle
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid,
     photoURL: user.photoURL || ""
-  });
-
-  db.ref('users').on('value', snapshot => {
-    userList.innerHTML = '';
-    snapshot.forEach(child => {
-      const u = child.val();
-      if (u.uid !== user.uid) {
-        const div = document.createElement('div');
-        div.className = 'user';
-        div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px;">
-            <img src="${u.photoURL || 'https://via.placeholder.com/30'}" width="30" height="30" style="border-radius:50%;">
-            <strong>${u.displayName}</strong>
-          </div>
-        `;
-        div.onclick = () => openChat(u.uid, user.uid, u.displayName);
-        userList.appendChild(div);
-      }
+  }).then(() => {
+    // Kullanıcı listesi yalnızca kayıt tamamlandıktan sonra dinleniyor
+    db.ref('users').on('value', snapshot => {
+      userList.innerHTML = '';
+      snapshot.forEach(child => {
+        const u = child.val();
+        if (u.uid !== user.uid) {
+          const div = document.createElement('div');
+          div.className = 'user';
+          div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+              <img src="${u.photoURL || 'https://via.placeholder.com/30'}" width="30" height="30" style="border-radius:50%;">
+              <strong>${u.displayName}</strong>
+            </div>
+          `;
+          div.onclick = () => openChat(u.uid, user.uid, u.displayName);
+          userList.appendChild(div);
+        }
+      });
     });
   });
 
@@ -84,7 +86,7 @@ function setupChatUI(user) {
     const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
     const chatRef = db.ref('chats/' + chatId);
 
-    chatRef.off(); // önceki dinleyiciyi kaldır
+    chatRef.off();
 
     chatRef.on('child_added', snapshot => {
       const msg = snapshot.val();
