@@ -10,7 +10,7 @@
   <script src="firebase.js"></script>
 </head>
 <body>
-  <div class="chat-container">
+  <div class="chat-layout">
     <div class="sidebar">
       <div class="profile">
         <h2>Mesajlaşma</h2>
@@ -18,11 +18,10 @@
       </div>
       <div id="userListContainer" class="user-list"></div>
     </div>
-
-    <div class="chat-area">
+    <div class="chat-section">
       <div class="chat-header" id="chatHeader">Sohbet seçin</div>
-      <div class="messages" id="messages"></div>
-      <div class="message-input">
+      <div class="chat-messages" id="messages"></div>
+      <div class="chat-input">
         <input type="text" id="messageInput" placeholder="Mesaj yazın..." disabled>
         <button id="sendButton" disabled>Gönder</button>
       </div>
@@ -36,15 +35,11 @@
     const chatHeader = document.getElementById('chatHeader');
 
     auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = 'index.html';
-      } else {
+      if (!user) window.location.href = 'index.html';
+      else {
         const userListContainer = document.getElementById('userListContainer');
 
-        db.ref('users/' + user.uid).set({
-          email: user.email,
-          uid: user.uid
-        });
+        db.ref('users/' + user.uid).set({ email: user.email, uid: user.uid });
 
         db.ref('users').on('value', snapshot => {
           userListContainer.innerHTML = '';
@@ -62,7 +57,7 @@
 
         function openChat(otherUid, myUid, otherEmail) {
           messagesEl.innerHTML = '';
-          chatHeader.textContent = "Sohbet: " + otherEmail;
+          chatHeader.textContent = otherEmail;
           messageInput.disabled = false;
           sendButton.disabled = false;
           const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
