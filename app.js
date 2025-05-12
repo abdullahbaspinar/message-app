@@ -107,3 +107,11 @@ function setupChatUI(user) {
     };
   }
 }
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .then(() => {
+    console.log("Persistence SESSION olarak ayarlandı.");
+    renderLoginScreen();
+  })
+  .catch((error) => {
+    console.error("Persistence ayarlanırken hata oluştu:", error);
+  });
