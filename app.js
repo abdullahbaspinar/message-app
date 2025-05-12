@@ -14,7 +14,6 @@ const auth = firebase.auth();
 
 renderLoginScreen();
 
-// Giriş Ekranı Render
 function renderLoginScreen() {
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -29,24 +28,21 @@ function renderLoginScreen() {
   };
 }
 
-// Oturum Kontrolü
 auth.onAuthStateChanged(user => {
-  console.log("onAuthStateChanged çağrıldı. Kullanıcı:", user);
   if (user) {
-    console.log("Kullanıcı oturumda, arayüz yükleniyor...");
+    console.log("Kullanıcı oturumda:", user.displayName);
     setupChatUI(user);
   } else {
-    console.log("Kullanıcı giriş yapmamış, giriş ekranı gösteriliyor.");
     renderLoginScreen();
   }
 });
 
-// Sohbet Arayüzü Render
 function setupChatUI(user) {
   const app = document.getElementById('app');
   app.innerHTML = `
     <div class="sidebar" id="userList"></div>
     <div class="chat-area">
+      <div id="chatHeader" class="chat-header">Sohbet seçilmedi</div>
       <div class="messages" id="messages"></div>
       <input type="text" id="messageInput" placeholder="Mesaj yazın..." />
     </div>
@@ -55,10 +51,12 @@ function setupChatUI(user) {
   const userList = document.getElementById('userList');
   const messagesEl = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
+  const chatHeader = document.getElementById('chatHeader');
 
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
-    uid: user.uid
+    uid: user.uid,
+    photoURL: user.photoURL || ""
   });
 
   db.ref('users').on('value', snapshot => {
@@ -68,7 +66,12 @@ function setupChatUI(user) {
       if (u.uid !== user.uid) {
         const div = document.createElement('div');
         div.className = 'user';
-        div.textContent = u.displayName;
+        div.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img src="${u.photoURL || 'https://via.placeholder.com/30'}" width="30" height="30" style="border-radius:50%;">
+            <strong>${u.displayName}</strong>
+          </div>
+        `;
         div.onclick = () => openChat(u.uid, user.uid, u.displayName);
         userList.appendChild(div);
       }
@@ -77,8 +80,11 @@ function setupChatUI(user) {
 
   function openChat(otherUid, myUid, otherName) {
     messagesEl.innerHTML = '';
+    chatHeader.innerText = "Sohbet: " + otherName;
     const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
     const chatRef = db.ref('chats/' + chatId);
+
+    chatRef.off(); // önceki dinleyiciyi kaldır
 
     chatRef.on('child_added', snapshot => {
       const msg = snapshot.val();

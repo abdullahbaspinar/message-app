@@ -1,55 +1,50 @@
-* {
-  box-sizing: border-box;
+body, html {
   margin: 0;
   padding: 0;
-}
-
-body, html {
-  height: 100%;
   font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #f0f0f0;
-}
-
-.login-container {
-  background: #fff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.login-container h1 {
-  margin-bottom: 20px;
-}
-
-#loginBtn {
-  padding: 10px 20px;
-  background: #25D366;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-#loginBtn:hover {
-  background: #1DA851;
+  height: 100%;
 }
 
 #app {
-  width: 100%;
   height: 100vh;
   display: flex;
+}
+
+.login-container {
+  margin: auto;
+  text-align: center;
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.login-container button {
+  padding: 10px 20px;
+  background-color: #25D366;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .sidebar {
   width: 30%;
   background: #f0f0f0;
-  border-right: 1px solid #ccc;
   overflow-y: auto;
+  border-right: 1px solid #ccc;
+}
+
+.sidebar .user {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar .user:hover {
+  background: #e6e6e6;
 }
 
 .chat-area {
@@ -58,21 +53,23 @@ body, html {
   flex-direction: column;
 }
 
-.user {
+.chat-header {
   padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #ddd;
+  background: #f8f8f8;
+  border-bottom: 1px solid #ccc;
+  font-weight: bold;
 }
 
 .messages {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
+  background: #fff;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
+input[type="text"] {
   border: none;
   border-top: 1px solid #ccc;
+  padding: 12px;
+  font-size: 16px;
 }
