@@ -108,3 +108,14 @@ function setupChatUI(user) {
     };
   }
 }
+
+auth.onAuthStateChanged(user => {
+  console.log("onAuthStateChanged çağrıldı. Kullanıcı:", user);
+  if (user) {
+    console.log("Kullanıcı oturumda, arayüz yükleniyor...");
+    setupChatUI(user);
+  } else {
+    console.log("Kullanıcı giriş yapmamış, giriş ekranı gösteriliyor.");
+    renderLoginScreen();
+  }
+});
