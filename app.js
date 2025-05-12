@@ -24,25 +24,30 @@ function renderLoginScreen() {
       </div>
     </div>
   `;
-
- document.getElementById('loginBtn').onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(result => {
-      console.log("Popup ile giriş başarılı:", result.user);
-      setupChatUI(result.user);
-    })
-    .catch(error => {
-      console.error("Popup hatası:", error);
-    });
-};
-
+  document.getElementById('loginBtn').onclick = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithRedirect(provider);
+  };
 }
 
-// Sohbet Ekranı
-function setupChatUI(user) {
-  console.log("setupChatUI çalıştı:", user);
+// Redirect Sonucu Dinle
+auth.getRedirectResult().then(result => {
+  if (result.user) {
+    setupChatUI(result.user);
+  } else {
+    renderLoginScreen();
+  }
+});
 
+// Oturum Kontrolü
+auth.onAuthStateChanged(user => {
+  if (user) {
+    setupChatUI(user);
+  }
+});
+
+// Sohbet Arayüzü
+function setupChatUI(user) {
   const wrapper = document.createElement('div');
   wrapper.id = 'app';
   document.body.innerHTML = '';
@@ -60,13 +65,11 @@ function setupChatUI(user) {
   const messagesEl = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
 
-  // Kullanıcıyı Listeye Kaydet
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid
   });
 
-  // Kullanıcı Listesini Getir
   db.ref('users').on('value', snapshot => {
     userList.innerHTML = '';
     snapshot.forEach(child => {
@@ -81,9 +84,7 @@ function setupChatUI(user) {
     });
   });
 
-  // Sohbet Aç
   function openChat(otherUid, myUid, otherName) {
-    console.log("Sohbet açıldı:", otherName);
     messagesEl.innerHTML = '';
     const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
     const chatRef = db.ref('chats/' + chatId);
@@ -107,29 +108,3 @@ function setupChatUI(user) {
     };
   }
 }
-
-// Başlangıçta Giriş Ekranını Göster
-renderLoginScreen();
-
-// Redirect Sonuçlarını Dinle
-auth.getRedirectResult().then(result => {
-  console.log("Redirect sonucu:", result);
-  if (result.user) {
-    console.log("Redirect başarılı, kullanıcı bulundu:", result.user.displayName);
-    setupChatUI(result.user);
-  }
-}).catch(error => {
-  console.error("Redirect hatası:", error);
-});
-
-// Oturum Açık mı Kontrol Et
-auth.onAuthStateChanged(user => {
-  console.log("onAuthStateChanged tetiklendi:", user);
-  if (user) {
-    console.log("Oturum açık, kullanıcı bulundu:", user.displayName);
-    setupChatUI(user);
-  } else {
-    console.log("Kullanıcı oturumu bulunamadı, giriş ekranı gösteriliyor.");
-    renderLoginScreen();
-  }
-});
