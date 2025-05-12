@@ -12,26 +12,39 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// 👉 Oturumu SESSION yap, her sayfa açıldığında kontrol etsin
+// 🔒 Session Persistence
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
   .then(() => {
     console.log("Session persistence aktif.");
-    // Sadece burada Login ekranı yükle
+
+    // ✅ Oturum kontrolü
     auth.onAuthStateChanged(user => {
+      console.log("onAuthStateChanged tetiklendi:", user);
       if (user) {
-        console.log("Oturum açık:", user.displayName);
+        console.log("Kullanıcı oturumda:", user.displayName);
         setupChatUI(user);
       } else {
         console.log("Oturum kapalı, giriş ekranı gösteriliyor.");
         renderLoginScreen();
       }
     });
+
+    // ✅ Redirect sonrası oturum kontrolü
+    auth.getRedirectResult().then(result => {
+      if (result.user) {
+        console.log("Redirect sonrası kullanıcı:", result.user.displayName);
+        setupChatUI(result.user);
+      } else {
+        console.log("Redirect sonrası kullanıcı yok.");
+      }
+    }).catch(error => {
+      console.error("Redirect hatası:", error);
+    });
   })
   .catch(error => {
-    console.error("Persistence hatası:", error);
+    console.error("Persistence ayarlanamadı:", error);
   });
 
-// Login Ekranı
 function renderLoginScreen() {
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -46,7 +59,6 @@ function renderLoginScreen() {
   };
 }
 
-// Sohbet Arayüzü
 function setupChatUI(user) {
   const app = document.getElementById('app');
   app.innerHTML = `
