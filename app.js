@@ -12,30 +12,28 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// 🔒 Session Persistence
+// 🔒 Oturum Sürekliliği
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
   .then(() => {
     console.log("Session persistence aktif.");
 
-    // ✅ Oturum kontrolü
-    auth.onAuthStateChanged(user => {
-      console.log("onAuthStateChanged tetiklendi:", user);
-      if (user) {
-        console.log("Kullanıcı oturumda:", user.displayName);
-        setupChatUI(user);
-      } else {
-        console.log("Oturum kapalı, giriş ekranı gösteriliyor.");
-        renderLoginScreen();
-      }
-    });
-
-    // ✅ Redirect sonrası oturum kontrolü
+    // ✅ Redirect Sonrası Oturum Kontrolü
     auth.getRedirectResult().then(result => {
       if (result.user) {
         console.log("Redirect sonrası kullanıcı:", result.user.displayName);
         setupChatUI(result.user);
       } else {
-        console.log("Redirect sonrası kullanıcı yok.");
+        // ✅ Normal Oturum Kontrolü
+        auth.onAuthStateChanged(user => {
+          console.log("onAuthStateChanged tetiklendi:", user);
+          if (user) {
+            console.log("Oturum aktif:", user.displayName);
+            setupChatUI(user);
+          } else {
+            console.log("Oturum kapalı, giriş ekranı gösteriliyor.");
+            renderLoginScreen();
+          }
+        });
       }
     }).catch(error => {
       console.error("Redirect hatası:", error);
@@ -45,6 +43,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
     console.error("Persistence ayarlanamadı:", error);
   });
 
+// 🟢 Giriş Ekranı
 function renderLoginScreen() {
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -59,6 +58,7 @@ function renderLoginScreen() {
   };
 }
 
+// 🟢 Sohbet Ekranı
 function setupChatUI(user) {
   const app = document.getElementById('app');
   app.innerHTML = `
