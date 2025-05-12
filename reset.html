@@ -2,25 +2,19 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Şifre Sıfırla</title>
+  <title>Şifremi Unuttum</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
+  <script src="app.js"></script>
 </head>
 <body>
-  <h1>Şifre Sıfırla</h1>
-  <input id="email" type="email" placeholder="E-posta"><br>
-  <button onclick="resetPassword()">Sıfırla</button>
-  <p><a href="login.html">Giriş Yap</a></p>
-
-  <script>
-    function resetPassword() {
-      const email = document.getElementById('email').value;
-      auth.sendPasswordResetEmail(email)
-        .then(() => alert('Şifre sıfırlama maili gönderildi'))
-        .catch(e => alert(e.message));
-    }
-  </script>
+  <div class="card">
+    <h1>Şifremi Unuttum</h1>
+    <input id="email" type="email" placeholder="E-posta">
+    <button onclick="resetPassword()">Şifreyi Sıfırla</button>
+    <a href="index.html">Giriş Yap</a>
+  </div>
 </body>
 </html>

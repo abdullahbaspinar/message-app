@@ -2,49 +2,94 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Mesajlaşma</title>
+  <title>Mesajlaşma Uygulaması</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
 </head>
 <body>
-  <h1>Mesajlaşma Ekranı</h1>
-  <button onclick="logout()">Çıkış Yap</button>
-  <div id="messages"></div>
-  <input type="text" id="messageInput" placeholder="Mesaj yazın..." />
+  <div class="container">
+    <div class="sidebar" id="userList">
+      <h2>Kullanıcılar</h2>
+      <button onclick="logout()" style="margin: 10px; width: calc(100% - 20px);">Çıkış Yap</button>
+    </div>
+    <div class="chat-area">
+      <div class="chat-header" id="chatHeader">Sohbet seçilmedi</div>
+      <div class="messages" id="messages"></div>
+      <div class="message-input">
+        <input type="text" id="messageInput" placeholder="Mesaj yazın...">
+      </div>
+    </div>
+  </div>
 
   <script>
     auth.onAuthStateChanged(user => {
       if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
       } else {
+        const userList = document.getElementById('userList');
         const messagesEl = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const chatRef = db.ref('chats/global');
+        const chatHeader = document.getElementById('chatHeader');
 
-        chatRef.on('child_added', snapshot => {
-          const msg = snapshot.val();
-          const p = document.createElement('p');
-          p.textContent = msg.sender + ': ' + msg.text;
-          messagesEl.appendChild(p);
+        db.ref('users/' + user.uid).set({
+          email: user.email,
+          uid: user.uid
         });
 
-        messageInput.addEventListener('keypress', e => {
-          if (e.key === 'Enter' && messageInput.value.trim() !== '') {
-            chatRef.push({
-              sender: user.email,
-              text: messageInput.value.trim()
-            });
-            messageInput.value = '';
-          }
+        db.ref('users').on('value', snapshot => {
+          userList.innerHTML = '<h2>Kullanıcılar</h2>';
+          snapshot.forEach(child => {
+            const u = child.val();
+            if (u.uid !== user.uid) {
+              const div = document.createElement('div');
+              div.className = 'user';
+              div.innerText = u.email;
+              div.onclick = () => openChat(u.uid, user.uid, u.email);
+              userList.appendChild(div);
+            }
+          });
+
+          const logoutBtn = document.createElement('button');
+          logoutBtn.textContent = "Çıkış Yap";
+          logoutBtn.onclick = logout;
+          userList.appendChild(logoutBtn);
         });
+
+        function openChat(otherUid, myUid, otherEmail) {
+          messagesEl.innerHTML = '';
+          chatHeader.innerText = "Sohbet: " + otherEmail;
+          const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
+          const chatRef = db.ref('chats/' + chatId);
+
+          chatRef.off();
+
+          chatRef.on('child_added', snapshot => {
+            const msg = snapshot.val();
+            const p = document.createElement('p');
+            p.textContent = msg.sender + ': ' + msg.text;
+            messagesEl.appendChild(p);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          });
+
+          messageInput.onkeypress = e => {
+            if (e.key === 'Enter' && messageInput.value.trim() !== '') {
+              chatRef.push({
+                sender: user.email,
+                text: messageInput.value.trim()
+              });
+              messageInput.value = '';
+            }
+          };
+        }
       }
     });
 
     function logout() {
       auth.signOut().then(() => {
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
       });
     }
   </script>
