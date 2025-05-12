@@ -1,4 +1,3 @@
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
   authDomain: "message-app-e45fa.firebaseapp.com",
@@ -9,19 +8,19 @@ const firebaseConfig = {
   appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
 };
 
-// Firebase Başlat
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// Giriş Ekranı
+renderLoginScreen();
+
+// Giriş Ekranı Render
 function renderLoginScreen() {
-  document.body.innerHTML = `
-    <div id="app">
-      <div class="login-container">
-        <h1>Mesajlaşma Uygulaması</h1>
-        <button id="loginBtn">Google ile Giriş Yap</button>
-      </div>
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="login-container">
+      <h1>Mesajlaşma Uygulaması</h1>
+      <button id="loginBtn">Google ile Giriş Yap</button>
     </div>
   `;
   document.getElementById('loginBtn').onclick = () => {
@@ -30,30 +29,22 @@ function renderLoginScreen() {
   };
 }
 
-// Redirect Sonucu Dinle
-auth.getRedirectResult().then(result => {
-  if (result.user) {
-    setupChatUI(result.user);
+// Oturum Kontrolü
+auth.onAuthStateChanged(user => {
+  console.log("onAuthStateChanged çağrıldı. Kullanıcı:", user);
+  if (user) {
+    console.log("Kullanıcı oturumda, arayüz yükleniyor...");
+    setupChatUI(user);
   } else {
+    console.log("Kullanıcı giriş yapmamış, giriş ekranı gösteriliyor.");
     renderLoginScreen();
   }
 });
 
-// Oturum Kontrolü
-auth.onAuthStateChanged(user => {
-  if (user) {
-    setupChatUI(user);
-  }
-});
-
-// Sohbet Arayüzü
+// Sohbet Arayüzü Render
 function setupChatUI(user) {
-  const wrapper = document.createElement('div');
-  wrapper.id = 'app';
-  document.body.innerHTML = '';
-  document.body.appendChild(wrapper);
-
-  document.getElementById('app').innerHTML = `
+  const app = document.getElementById('app');
+  app.innerHTML = `
     <div class="sidebar" id="userList"></div>
     <div class="chat-area">
       <div class="messages" id="messages"></div>
@@ -108,14 +99,3 @@ function setupChatUI(user) {
     };
   }
 }
-
-auth.onAuthStateChanged(user => {
-  console.log("onAuthStateChanged çağrıldı. Kullanıcı:", user);
-  if (user) {
-    console.log("Kullanıcı oturumda, arayüz yükleniyor...");
-    setupChatUI(user);
-  } else {
-    console.log("Kullanıcı giriş yapmamış, giriş ekranı gösteriliyor.");
-    renderLoginScreen();
-  }
-});
