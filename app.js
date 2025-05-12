@@ -3,7 +3,7 @@ const firebaseConfig = {
   authDomain: "message-app-e45fa.firebaseapp.com",
   databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
   projectId: "message-app-e45fa",
-  storageBucket: "message-app-e45fa.appspot.com",
+  storageBucket: "message-app-e45fa.firebasestorage.app",
   messagingSenderId: "1090017668550",
   appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
 };
