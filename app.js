@@ -1,20 +1,22 @@
+// SDK bağlantıları zaten index.html'de <script src="...firebase-app-compat.js"> ile geldiği için
+// burada yeniden import etmeye gerek yok. Aşağıdaki firebaseConfig ile devam edebiliriz:
+
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", // <--- This is unique to YOUR web app!
-  authDomain: "message-app-e45fa.firebaseapp.com", // Derived from your Project ID
-  databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com", // From your Realtime Database info
-  projectId: "message-app-e45fa", // Your Project ID!
-  storageBucket: "message-app-e45fa.firebasestorage.app", // Standard format based on Project ID
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // <--- This is unique to YOUR web app!
-  appId: "YOUR_APP_ID", // <--- This is unique to YOUR web app!
-  // measurementId: "YOUR_MEASUREMENT_ID", // Optional: Only included if Google Analytics is enabled
+  apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
+  authDomain: "message-app-e45fa.firebaseapp.com",
+  databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
+  projectId: "message-app-e45fa",
+  storageBucket: "message-app-e45fa.appspot.com", // .app değil, .com olmalı
+  messagingSenderId: "1090017668550",
+  appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
 };
 
-
+// ✅ Firebase başlat
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// 🔐 Redirect tabanlı giriş
+// 🔐 Giriş Ekranı
 document.getElementById('app').innerHTML = `
   <div class="login-container">
     <h1>Mesajlaşma Uygulaması</h1>
@@ -34,7 +36,7 @@ auth.getRedirectResult().then(result => {
   }
 });
 
-// 🟢 Giriş sonrası sohbet arayüzü
+// 🟢 Sohbet arayüzü
 function setupChatUI(user) {
   document.body.innerHTML = `<div id="app"></div>`;
   document.getElementById('app').innerHTML = `
@@ -49,13 +51,13 @@ function setupChatUI(user) {
   const messagesEl = document.getElementById('messages');
   const messageInput = document.getElementById('messageInput');
 
-  // 🧑 Kullanıcıyı Firebase'e ekle
+  // 🔐 Kullanıcıyı veritabanına ekle
   db.ref('users/' + user.uid).set({
     displayName: user.displayName,
     uid: user.uid
   });
 
-  // 📜 Kullanıcı listesini yükle
+  // 👥 Kullanıcı listesini getir
   db.ref('users').on('value', snapshot => {
     userList.innerHTML = '';
     snapshot.forEach(child => {
@@ -70,7 +72,7 @@ function setupChatUI(user) {
     });
   });
 
-  // 💬 Sohbet başlat
+  // 💬 Sohbeti başlat
   function openChat(otherUid, myUid, otherName) {
     messagesEl.innerHTML = '';
     const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
