@@ -68,7 +68,15 @@
           chatRef.on('child_added', snapshot => {
             const msg = snapshot.val();
             const p = document.createElement('p');
-            p.textContent = msg.sender + ': ' + msg.text;
+            p.textContent = msg.text;
+
+            // Mesajın sahibi kim kontrolü
+            if (msg.sender === user.email) {
+              p.classList.add('sent');
+            } else {
+              p.classList.add('received');
+            }
+
             messagesEl.appendChild(p);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           });

@@ -1,3 +1,4 @@
+/* Ortak ayarlar */
 * {
   box-sizing: border-box;
 }
@@ -21,6 +22,7 @@ body {
   overflow: hidden;
 }
 
+/* Sidebar */
 .sidebar {
   width: 30%;
   background: #ededed;
@@ -51,6 +53,7 @@ body {
   background: #d9d9d9;
 }
 
+/* Chat area */
 .chat-area {
   flex: 1;
   display: flex;
@@ -70,14 +73,29 @@ body {
   padding: 15px;
   overflow-y: auto;
   background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Mesaj kutuları */
 .messages p {
   margin: 5px 0;
   padding: 10px;
-  background: #e0f7fa;
   border-radius: 8px;
   max-width: 60%;
+}
+
+/* Sağdan gelen mesajlar */
+.messages p.sent {
+  background: #dcf8c6;
+  align-self: flex-end;
+}
+
+/* Soldan gelen mesajlar */
+.messages p.received {
+  background: #fff;
+  border: 1px solid #ccc;
+  align-self: flex-start;
 }
 
 .message-input {
