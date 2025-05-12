@@ -1,3 +1,4 @@
+// Firebase Ayarları
 const firebaseConfig = {
   apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
   authDomain: "message-app-e45fa.firebaseapp.com",
@@ -7,123 +8,88 @@ const firebaseConfig = {
   messagingSenderId: "1090017668550",
   appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
 };
-
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+
 const auth = firebase.auth();
+const db = firebase.database();
 
-// 🔒 Oturum Sürekliliği
-auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-  .then(() => {
-    console.log("Session persistence aktif.");
-
-    // ✅ Redirect Sonrası Oturum Kontrolü
-    auth.getRedirectResult().then(result => {
-      if (result.user) {
-        console.log("Redirect sonrası kullanıcı:", result.user.displayName);
-        setupChatUI(result.user);
-      } else {
-        // ✅ Normal Oturum Kontrolü
-        auth.onAuthStateChanged(user => {
-          console.log("onAuthStateChanged tetiklendi:", user);
-          if (user) {
-            console.log("Oturum aktif:", user.displayName);
-            setupChatUI(user);
-          } else {
-            console.log("Oturum kapalı, giriş ekranı gösteriliyor.");
-            renderLoginScreen();
-          }
-        });
-      }
-    }).catch(error => {
-      console.error("Redirect hatası:", error);
-    });
-  })
-  .catch(error => {
-    console.error("Persistence ayarlanamadı:", error);
-  });
-
-// 🟢 Giriş Ekranı
-function renderLoginScreen() {
-  const app = document.getElementById('app');
-  app.innerHTML = `
-    <div class="login-container">
-      <h1>Mesajlaşma Uygulaması</h1>
-      <button id="loginBtn">Google ile Giriş Yap</button>
-    </div>
+function showLogin() {
+  document.getElementById('app').innerHTML = `
+    <h2>Giriş Yap</h2>
+    <input type="email" id="loginEmail" placeholder="E-posta"><br>
+    <input type="password" id="loginPassword" placeholder="Şifre"><br>
+    <button onclick="login()">Giriş Yap</button><br>
+    <a href="#" onclick="showRegister()">Hesabınız yok mu? Kayıt Ol</a><br>
+    <a href="#" onclick="showReset()">Şifremi Unuttum</a>
   `;
-  document.getElementById('loginBtn').onclick = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider);
-  };
 }
 
-// 🟢 Sohbet Ekranı
-function setupChatUI(user) {
-  const app = document.getElementById('app');
-  app.innerHTML = `
-    <div class="sidebar" id="userList"></div>
-    <div class="chat-area">
-      <div id="chatHeader" class="chat-header">Sohbet seçilmedi</div>
-      <div class="messages" id="messages"></div>
-      <input type="text" id="messageInput" placeholder="Mesaj yazın..." />
-    </div>
+function showRegister() {
+  document.getElementById('app').innerHTML = `
+    <h2>Kayıt Ol</h2>
+    <input type="email" id="registerEmail" placeholder="E-posta"><br>
+    <input type="password" id="registerPassword" placeholder="Şifre"><br>
+    <button onclick="register()">Kayıt Ol</button><br>
+    <a href="#" onclick="showLogin()">Zaten hesabınız var mı? Giriş Yap</a>
   `;
+}
 
-  const userList = document.getElementById('userList');
-  const messagesEl = document.getElementById('messages');
-  const messageInput = document.getElementById('messageInput');
-  const chatHeader = document.getElementById('chatHeader');
+function showReset() {
+  document.getElementById('app').innerHTML = `
+    <h2>Şifre Sıfırlama</h2>
+    <input type="email" id="resetEmail" placeholder="E-posta"><br>
+    <button onclick="resetPassword()">Sıfırlama Maili Gönder</button><br>
+    <a href="#" onclick="showLogin()">Girişe Dön</a>
+  `;
+}
 
-  db.ref('users/' + user.uid).set({
-    displayName: user.displayName,
-    uid: user.uid,
-    photoURL: user.photoURL || ""
-  }).then(() => {
-    db.ref('users').on('value', snapshot => {
-      userList.innerHTML = '';
-      snapshot.forEach(child => {
-        const u = child.val();
-        if (u.uid !== user.uid) {
-          const div = document.createElement('div');
-          div.className = 'user';
-          div.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-              <img src="${u.photoURL || 'https://via.placeholder.com/30'}" width="30" height="30" style="border-radius:50%;">
-              <strong>${u.displayName}</strong>
-            </div>
-          `;
-          div.onclick = () => openChat(u.uid, user.uid, u.displayName);
-          userList.appendChild(div);
-        }
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const user = userCredential.user;
+      showChat(user);
+    })
+    .catch(error => alert(error.message));
+}
+
+function register() {
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const user = userCredential.user;
+      db.ref('users/' + user.uid).set({
+        email: user.email,
+        uid: user.uid
       });
-    });
-  });
-
-  function openChat(otherUid, myUid, otherName) {
-    messagesEl.innerHTML = '';
-    chatHeader.innerText = "Sohbet: " + otherName;
-    const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
-    const chatRef = db.ref('chats/' + chatId);
-
-    chatRef.off();
-
-    chatRef.on('child_added', snapshot => {
-      const msg = snapshot.val();
-      const p = document.createElement('p');
-      p.textContent = msg.sender + ': ' + msg.text;
-      messagesEl.appendChild(p);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    });
-
-    messageInput.onkeypress = e => {
-      if (e.key === 'Enter' && messageInput.value.trim() !== '') {
-        chatRef.push({
-          sender: user.displayName,
-          text: messageInput.value.trim()
-        });
-        messageInput.value = '';
-      }
-    };
-  }
+      showChat(user);
+    })
+    .catch(error => alert(error.message));
 }
+
+function resetPassword() {
+  const email = document.getElementById('resetEmail').value;
+  auth.sendPasswordResetEmail(email)
+    .then(() => alert('Şifre sıfırlama maili gönderildi.'))
+    .catch(error => alert(error.message));
+}
+
+function showChat(user) {
+  document.getElementById('app').innerHTML = `
+    <h2>Hoşgeldiniz, ${user.email}</h2>
+    <button onclick="auth.signOut().then(showLogin)">Çıkış Yap</button>
+  `;
+}
+
+// Oturum Açık mı Kontrol Et
+auth.onAuthStateChanged(user => {
+  if (user) {
+    showChat(user);
+  } else {
+    showLogin();
+  }
+});

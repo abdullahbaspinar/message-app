@@ -1,75 +1,40 @@
-body, html {
-  margin: 0;
-  padding: 0;
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   font-family: Arial, sans-serif;
-  height: 100%;
+  background-color: #f7f7f7;
 }
 
 #app {
-  height: 100vh;
-  display: flex;
-}
-
-.login-container {
-  margin: auto;
   text-align: center;
   background: #fff;
-  padding: 40px;
+  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.login-container button {
-  padding: 10px 20px;
+input {
+  margin: 10px 0;
+  padding: 8px;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 8px 16px;
   background-color: #25D366;
-  color: white;
+  color: #fff;
   border: none;
   border-radius: 5px;
-  font-size: 16px;
   cursor: pointer;
 }
 
-.sidebar {
-  width: 30%;
-  background: #f0f0f0;
-  overflow-y: auto;
-  border-right: 1px solid #ccc;
-}
-
-.sidebar .user {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.sidebar .user:hover {
-  background: #e6e6e6;
-}
-
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-header {
-  padding: 10px;
-  background: #f8f8f8;
-  border-bottom: 1px solid #ccc;
-  font-weight: bold;
-}
-
-.messages {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background: #fff;
-}
-
-input[type="text"] {
-  border: none;
-  border-top: 1px solid #ccc;
-  padding: 12px;
-  font-size: 16px;
+a {
+  display: block;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
 }
