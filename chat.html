@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mesajlaşma Uygulaması</title>
+  <title>Mesajlaşma</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
 </head>
-<body class="chat-body">
-  <div class="chat-container">
-    <div class="chat-sidebar">
-      <div class="chat-profile">
+<body class="chat-gradient">
+  <div class="chat-wrapper">
+    <aside class="sidebar">
+      <header class="sidebar-header">
         <h2>Mesajlaşma</h2>
         <button onclick="logout()">Çıkış</button>
-      </div>
-      <div id="userListContainer" class="chat-user-list"></div>
-    </div>
+      </header>
+      <div id="userListContainer" class="user-list"></div>
+    </aside>
 
-    <div class="chat-main">
-      <div class="chat-header" id="chatHeader">Sohbet seçin</div>
-      <div class="chat-messages" id="messages"></div>
-      <div class="chat-input-area">
-        <input type="text" id="messageInput" placeholder="Mesaj yazın..." disabled />
-        <button id="sendButton" disabled>📤</button>
+    <main class="chat-area">
+      <header class="chat-top" id="chatHeader">Sohbet seçin</header>
+      <div id="messages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Mesaj yaz..." disabled />
+        <button id="sendButton" disabled>📩</button>
       </div>
-    </div>
+    </main>
   </div>
 
   <script>
@@ -48,7 +48,7 @@
             const u = child.val();
             if (u.uid !== user.uid) {
               const div = document.createElement('div');
-              div.className = 'chat-user';
+              div.className = 'user-item';
               div.textContent = u.email;
               div.onclick = () => openChat(u.uid, user.uid, u.email);
               userListContainer.appendChild(div);
@@ -69,7 +69,7 @@
             const msg = snapshot.val();
             const p = document.createElement('p');
             p.textContent = msg.text;
-            p.className = msg.sender === user.email ? 'sent' : 'received';
+            p.className = msg.sender === user.email ? 'msg sent' : 'msg received';
             messagesEl.appendChild(p);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           });
