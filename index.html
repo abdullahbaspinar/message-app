@@ -1,23 +1,41 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Giriş Yap</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="firebse.js"></script>
-  <script src="app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script>
 </head>
-<body>
-  <div class="card">
-    <h1>Giriş Yap</h1>
-    <input id="email" type="email" placeholder="E-posta">
-    <input id="password" type="password" placeholder="Şifre">
+<body class="gradient-bg">
+  <div class="login-card">
+    <h2>Kullanıcı Girişi</h2>
+    <div class="input-group">
+      <span class="icon">👤</span>
+      <input type="email" id="email" placeholder="E-posta adresiniz" />
+    </div>
+    <div class="input-group">
+      <span class="icon">🔒</span>
+      <input type="password" id="password" placeholder="Şifre" />
+    </div>
     <button onclick="login()">Giriş Yap</button>
-    <a href="register.html">Kayıt Ol</a>
-    <a href="reset.html">Şifremi Unuttum</a>
+    <div class="login-links">
+      <a href="reset.html">Şifremi unuttum</a>
+      <a href="register.html">Hesabınız yok mu? Kayıt ol</a>
+    </div>
   </div>
+
+  <script>
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => window.location.href = 'chat.html')
+        .catch(e => alert(e.message));
+    }
+  </script>
 </body>
 </html>
- 
