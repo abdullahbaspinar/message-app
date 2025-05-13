@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kayıt Ol</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="firebase.js"></script>
   <script src="app.js"></script>
 </head>
-<body>
-  <div class="card">
-    <h1>Kayıt Ol</h1>
-    <input id="email" type="email" placeholder="E-posta">
-    <input id="password" type="password" placeholder="Şifre">
+<body class="gradient-bg">
+  <div class="login-card">
+    <h1 class="login-title">Kayıt Ol</h1>
+    <div class="form-group">
+      <input id="email" type="email" placeholder="E-posta" required />
+    </div>
+    <div class="form-group">
+      <input id="password" type="password" placeholder="Şifre" required />
+    </div>
     <button onclick="register()">Kayıt Ol</button>
-    <a href="index.html">Giriş Yap</a>
+    <div class="login-links">
+      <a href="index.html">Giriş Yap</a>
+    </div>
   </div>
 </body>
 </html>
