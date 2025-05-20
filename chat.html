@@ -9,10 +9,66 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
+  <style>
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 80%;
+        background-color: #f1f5f9;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        border-right: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .chat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .menu-toggle {
+        display: inline-block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .menu-toggle {
+        display: none;
+      }
+    }
+
+    .sidebar-header {
+      flex-shrink: 0;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .user-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-top: 12px;
+      max-height: calc(100vh - 100px);
+    }
+  </style>
 </head>
 <body class="chat-gradient">
   <div class="chat-wrapper">
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <header class="sidebar-header">
         <h2>Mesajlaşma</h2>
         <button onclick="logout()">Çıkış</button>
@@ -21,7 +77,10 @@
     </aside>
 
     <main class="chat-area">
-      <header class="chat-top" id="chatHeader">Sohbet seçin</header>
+      <header class="chat-top" id="chatHeader">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span id="chatTitle">Sohbet seçin</span>
+      </header>
       <div id="messages" class="chat-messages"></div>
       <div class="chat-input">
         <input type="text" id="messageInput" placeholder="Mesaj yaz..." disabled />
@@ -34,7 +93,12 @@
     const sendButton = document.getElementById('sendButton');
     const messageInput = document.getElementById('messageInput');
     const messagesEl = document.getElementById('messages');
-    const chatHeader = document.getElementById('chatHeader');
+    const chatTitle = document.getElementById('chatTitle');
+    const sidebar = document.getElementById('sidebar');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+    }
 
     auth.onAuthStateChanged(user => {
       if (!user) window.location.href = 'index.html';
@@ -50,7 +114,10 @@
               const div = document.createElement('div');
               div.className = 'user-item';
               div.textContent = u.email;
-              div.onclick = () => openChat(u.uid, user.uid, u.email);
+              div.onclick = () => {
+                openChat(u.uid, user.uid, u.email);
+                if (window.innerWidth <= 768) sidebar.classList.remove('open');
+              };
               userListContainer.appendChild(div);
             }
           });
@@ -58,7 +125,7 @@
 
         function openChat(otherUid, myUid, otherEmail) {
           messagesEl.innerHTML = '';
-          chatHeader.textContent = otherEmail;
+          chatTitle.textContent = otherEmail;
           messageInput.disabled = false;
           sendButton.disabled = false;
           const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
@@ -69,7 +136,7 @@
             const msg = snapshot.val();
             const p = document.createElement('p');
             p.textContent = msg.text;
-            p.className = msg.sender === user.email ? 'msg sent' : 'msg received';
+            p.className = 'msg ' + (msg.sender === user.email ? 'sent' : 'received');
             messagesEl.appendChild(p);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           });
