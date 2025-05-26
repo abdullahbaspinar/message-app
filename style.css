@@ -108,12 +108,14 @@
   border-radius: 16px;
   font-size: 15px;
   line-height: 1.4;
-  display: inline-block;
+  display: inline;
   white-space: nowrap;
   max-width: 100%;
   overflow-wrap: break-word;
   background-color: #25D366;
   color: white;
+    align-self: flex-end;
+
 }
 
 
