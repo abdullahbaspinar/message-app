@@ -17,13 +17,14 @@
         left: 0;
         height: 100%;
         width: 80%;
-        background-color: #f1f5f9;
+        background-color: rgba(15, 15, 15, 0.98);
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: 1000;
-        border-right: 1px solid #ccc;
         display: flex;
         flex-direction: column;
+        border-right: 1px solid #333;
+        backdrop-filter: blur(10px);
       }
 
       .sidebar.open {
@@ -44,6 +45,21 @@
         font-size: 24px;
         cursor: pointer;
       }
+
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 999;
+      }
+
+      .sidebar.open ~ .overlay {
+        display: block;
+      }
     }
 
     @media (min-width: 769px) {
@@ -54,15 +70,68 @@
 
     .sidebar-header {
       flex-shrink: 0;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #ccc;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.6);
+      border-bottom: 1px solid #444;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .user-list {
       flex: 1;
       overflow-y: auto;
-      padding-top: 12px;
-      max-height: calc(100vh - 100px);
+      padding: 12px;
+      background: transparent;
+    }
+
+    .user-item {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      color: #ccc;
+      transition: background 0.2s, color 0.2s;
+      font-size: 14px;
+    }
+
+    .user-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .msg-wrapper {
+      display: flex;
+      flex-direction: column;
+      max-width: 60%;
+      margin: 6px 0;
+    }
+
+    .msg {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .sent {
+      background-color: #25D366;
+      align-self: flex-end;
+      color: white;
+    }
+
+    .received {
+      background-color: #eeeeee;
+      align-self: flex-start;
+      color: #222;
+    }
+
+    .msg-time {
+      font-size: 11px;
+      color: #aaa;
+      margin: 2px 8px;
+      align-self: flex-end;
     }
   </style>
 </head>
@@ -87,6 +156,8 @@
         <button id="sendButton" disabled>📩</button>
       </div>
     </main>
+
+    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
 
   <script>
@@ -98,6 +169,10 @@
 
     function toggleSidebar() {
       sidebar.classList.toggle('open');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
     }
 
     auth.onAuthStateChanged(user => {
@@ -134,10 +209,23 @@
           chatRef.off();
           chatRef.on('child_added', snapshot => {
             const msg = snapshot.val();
+
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = 'msg-wrapper ' + (msg.sender === user.email ? 'sent' : 'received');
+
             const p = document.createElement('p');
             p.textContent = msg.text;
-            p.className = 'msg ' + (msg.sender === user.email ? 'sent' : 'received');
-            messagesEl.appendChild(p);
+            p.className = 'msg';
+
+            const time = document.createElement('span');
+            const timestamp = new Date(msg.timestamp || Date.now());
+            time.className = 'msg-time';
+            time.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageWrapper.appendChild(p);
+            messageWrapper.appendChild(time);
+
+            messagesEl.appendChild(messageWrapper);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           });
 
@@ -147,7 +235,11 @@
           function sendMessage() {
             const text = messageInput.value.trim();
             if (text !== '') {
-              chatRef.push({ sender: user.email, text });
+              db.ref('chats/' + chatId).push({
+                sender: user.email,
+                text: text,
+                timestamp: Date.now()
+              });
               messageInput.value = '';
             }
           }
