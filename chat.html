@@ -10,66 +10,40 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
   <style>
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 80%;
-        background-color: rgba(15, 15, 15, 0.98);
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        border-right: 1px solid #333;
-        backdrop-filter: blur(10px);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .chat-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .menu-toggle {
-        display: inline-block;
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-      }
-
-      .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.4);
-        z-index: 999;
-      }
-
-      .sidebar.open ~ .overlay {
-        display: block;
-      }
+    body.chat-gradient {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(#141e30, #243b55);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    @media (min-width: 769px) {
-      .menu-toggle {
-        display: none;
-      }
+    .chat-wrapper {
+      display: flex;
+      width: 95%;
+      height: 90vh;
+      background: rgba(0,0,0,0.6);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .sidebar {
+      width: 25%;
+      min-width: 220px;
+      background: rgba(20, 20, 20, 0.9);
+      display: flex;
+      flex-direction: column;
+      color: white;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1001;
     }
 
     .sidebar-header {
-      flex-shrink: 0;
       padding: 16px;
       background: rgba(0, 0, 0, 0.6);
       border-bottom: 1px solid #444;
@@ -77,6 +51,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .sidebar button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #c0392b;
     }
 
     .user-list {
@@ -100,11 +89,56 @@
       color: #fff;
     }
 
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .chat-top {
+      padding: 20px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: white;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
     .msg-wrapper {
       display: flex;
       flex-direction: column;
-      max-width: 60%;
       margin: 6px 0;
+      max-width: 60%;
+    }
+
+    .msg-wrapper.sent {
+      align-self: flex-end;
+    }
+
+    .msg-wrapper.received {
+      align-self: flex-start;
     }
 
     .msg {
@@ -113,25 +147,105 @@
       font-size: 15px;
       line-height: 1.4;
       word-wrap: break-word;
-    }
-
-    .sent {
       background-color: #25D366;
-      align-self: flex-end;
       color: white;
     }
 
-    .received {
+    .msg-wrapper.received .msg {
       background-color: #eeeeee;
-      align-self: flex-start;
       color: #222;
     }
 
     .msg-time {
       font-size: 11px;
       color: #aaa;
-      margin: 2px 8px;
+      margin: 3px 8px 0 8px;
       align-self: flex-end;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 16px;
+      background: rgba(0,0,0,0.3);
+      border-top: 1px solid #444;
+      gap: 10px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 15px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    .chat-input button {
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 20px;
+      border: none;
+      background: #25D366;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .chat-input button:hover {
+      background: #1ebe5f;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+    }
+
+    .sidebar.open ~ .overlay {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .chat-wrapper {
+        flex-direction: column;
+        width: 100%;
+        height: 100vh;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 80%;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        background: rgba(15, 15, 15, 0.98);
+        backdrop-filter: blur(10px);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .menu-toggle {
+        display: inline-block;
+      }
+
+      .chat-area {
+        width: 100%;
+      }
+
+      .chat-messages {
+        height: 100%;
+        max-height: 100%;
+      }
     }
   </style>
 </head>
@@ -210,22 +324,22 @@
           chatRef.on('child_added', snapshot => {
             const msg = snapshot.val();
 
-            const messageWrapper = document.createElement('div');
-            messageWrapper.className = 'msg-wrapper ' + (msg.sender === user.email ? 'sent' : 'received');
+            const wrapper = document.createElement('div');
+            wrapper.className = (msg.sender === user.email) ? 'msg-wrapper sent' : 'msg-wrapper received';
 
-            const p = document.createElement('p');
-            p.textContent = msg.text;
-            p.className = 'msg';
+            const bubble = document.createElement('div');
+            bubble.className = 'msg';
+            bubble.textContent = msg.text;
 
-            const time = document.createElement('span');
-            const timestamp = new Date(msg.timestamp || Date.now());
+            const time = document.createElement('div');
             time.className = 'msg-time';
+            const timestamp = new Date(msg.timestamp || Date.now());
             time.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            messageWrapper.appendChild(p);
-            messageWrapper.appendChild(time);
+            wrapper.appendChild(bubble);
+            wrapper.appendChild(time);
 
-            messagesEl.appendChild(messageWrapper);
+            messagesEl.appendChild(wrapper);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           });
 
