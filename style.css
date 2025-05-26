@@ -35,6 +35,8 @@
     justify-content: space-between;
     align-items: center;
     color: #fff;
+    gap: 10px;
+
   }
 
   .sidebar button {
