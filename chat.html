@@ -35,7 +35,7 @@
     .sidebar {
       width: 25%;
       min-width: 220px;
-      background: rgba(20, 20, 20, 0.9);
+      background: rgba(20, 20, 20, 0.95);
       display: flex;
       flex-direction: column;
       color: white;
@@ -47,7 +47,6 @@
       padding: 16px;
       background: rgba(0, 0, 0, 0.6);
       border-bottom: 1px solid #444;
-      color: white;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -61,18 +60,12 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s ease;
-    }
-
-    .sidebar button:hover {
-      background-color: #c0392b;
     }
 
     .user-list {
       flex: 1;
       overflow-y: auto;
       padding: 12px;
-      background: transparent;
     }
 
     .user-item {
@@ -96,7 +89,6 @@
       background: rgba(0,0,0,0.4);
       color: white;
       height: 100%;
-      min-height: 0;
     }
 
     .chat-top {
@@ -123,14 +115,13 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      min-height: 0;
     }
 
     .msg-wrapper {
       display: flex;
       flex-direction: column;
-      margin: 6px 0;
-      max-width: 60%;
+      max-width: 75%;
+      margin: 10px 0;
     }
 
     .msg-wrapper.sent {
@@ -143,23 +134,26 @@
 
     .msg {
       padding: 12px 16px;
-      border-radius: 16px;
+      border-radius: 18px;
       font-size: 15px;
       line-height: 1.4;
       word-wrap: break-word;
       background-color: #25D366;
       color: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .msg-wrapper.received .msg {
-      background-color: #eeeeee;
+      background-color: #ffffff;
       color: #222;
     }
 
     .msg-time {
       font-size: 11px;
-      color: #aaa;
-      margin: 3px 8px 0 8px;
+      color: #b0b0b0;
+      margin-top: 4px;
+      margin-left: 6px;
+      margin-right: 6px;
       align-self: flex-end;
     }
 
@@ -188,7 +182,6 @@
       background: #25D366;
       color: white;
       cursor: pointer;
-      transition: background 0.2s ease;
     }
 
     .chat-input button:hover {
@@ -226,8 +219,6 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: 1000;
-        background: rgba(15, 15, 15, 0.98);
-        backdrop-filter: blur(10px);
       }
 
       .sidebar.open {
@@ -236,15 +227,6 @@
 
       .menu-toggle {
         display: inline-block;
-      }
-
-      .chat-area {
-        width: 100%;
-      }
-
-      .chat-messages {
-        height: 100%;
-        max-height: 100%;
       }
     }
   </style>
