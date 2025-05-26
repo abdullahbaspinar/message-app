@@ -108,15 +108,15 @@
   border-radius: 16px;
   font-size: 15px;
   line-height: 1.4;
-  display: inline;
-  white-space: nowrap;
-  max-width: 100%;
-  overflow-wrap: break-word;
+  display: inline-block;
+  white-space: normal;
+  max-width: 60%;
+  word-break: break-word;
   background-color: #25D366;
   color: white;
-    align-self: flex-end;
-
+  align-self: flex-end;
 }
+
 
 
   .sent {
