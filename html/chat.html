@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mesajlaşma</title>
-  <link rel="stylesheet" href="css/style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -242,7 +241,7 @@
     }
   </style>
 </head>
-<body class="chat-gradient">
+<body>
   <div class="chat-wrapper">
     <aside class="sidebar" id="sidebar">
       <header class="sidebar-header">
@@ -275,6 +274,7 @@
     const menuToggle = document.getElementById('menuToggle');
     const overlay = document.getElementById('overlay');
     const logoutBtn = document.getElementById('logoutBtn');
+    const userListContainer = document.getElementById('userListContainer');
 
     function toggleSidebar() {
       sidebar.classList.toggle('open');
@@ -299,11 +299,8 @@
     }
 
     auth.onAuthStateChanged(user => {
-      if (!user) return window.location.href = 'index.html';
+      if (!user) return window.location.href = 'html/login.html';
 
-      const userListContainer = document.getElementById('userListContainer');
-
-      // Kullanıcıyı veritabanına yaz
       db.ref('users/' + user.uid).set({
         email: user.email,
         uid: user.uid
@@ -312,7 +309,6 @@
       db.ref('users').on('value', snapshot => {
         userListContainer.innerHTML = '';
         const users = snapshot.val();
-        console.log("Kullanıcılar:", users); // Veriyi kontrol et
         for (let uid in users) {
           const u = users[uid];
           if (uid !== user.uid && u.email && u.uid) {
@@ -400,7 +396,9 @@
       }
 
       logoutBtn.addEventListener('click', () => {
-        auth.signOut().then(() => window.location.href = 'index.html');
+        auth.signOut()
+          .then(() => window.location.href = 'html/login.html')
+          .catch(error => alert('Çıkış yapılamadı: ' + error.message));
       });
     });
   </script>
