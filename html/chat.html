@@ -326,7 +326,7 @@
 
       logoutBtn.onclick = () => {
         auth.signOut().then(() => {
-          window.location.href = '/index.html'; // ✅ çıkınca index.html'e gider
+          window.location.href = '../index.html'; 
         }).catch(err => alert("Çıkış hatası: " + err.message));
       };
 
