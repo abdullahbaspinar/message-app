@@ -7,264 +7,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-  <script src="/js/firebase.js"></script>
-  <style>
-    :root {
-      --vh: 1vh;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      min-height: 100dvh;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(#141e30, #243b55);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .chat-wrapper {
-      display: flex;
-      flex-direction: row;
-      height: calc(var(--vh, 1vh) * 100);
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .sidebar {
-      width: 25%;
-      min-width: 220px;
-      background: rgba(20, 20, 20, 0.95);
-      display: flex;
-      flex-direction: column;
-      color: white;
-      border-right: 1px solid rgba(255,255,255,0.1);
-      z-index: 1001;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      background: rgba(0, 0, 0, 0.6);
-      border-bottom: 1px solid #444;
-    }
-
-    .sidebar button {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .user-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-    }
-
-    .user-item {
-      padding: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer;
-      color: #ccc;
-    }
-
-    .user-item:hover {
-      background-color: rgba(255,255,255,0.05);
-      color: #fff;
-    }
-
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: rgba(0,0,0,0.4);
-      color: white;
-      height: 100%;
-      min-height: 0;
-    }
-
-    .chat-top {
-      padding: 20px;
-      font-weight: bold;
-      background: rgba(0,0,0,0.3);
-      border-bottom: 1px solid #444;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .msg-wrapper {
-      display: flex;
-      flex-direction: column;
-      max-width: 75%;
-      margin: 10px 0;
-    }
-
-    .msg-wrapper.sent {
-      align-self: flex-end;
-    }
-
-    .msg-wrapper.received {
-      align-self: flex-start;
-    }
-
-    .msg {
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 15px;
-      line-height: 1.4;
-      word-break: break-word;
-      background-color: #25D366;
-      color: white;
-    }
-
-    .msg-wrapper.received .msg {
-      background-color: #ffffff;
-      color: #222;
-    }
-
-    .msg-time {
-      font-size: 11px;
-      color: #aaa;
-      margin-top: 4px;
-    }
-
-    .msg-status {
-      font-size: 10px;
-      color: #999;
-      margin-top: 2px;
-      align-self: flex-end;
-    }
-
-    .chat-input {
-      display: flex;
-      padding: 16px;
-      background: rgba(0,0,0,0.3);
-      border-top: 1px solid #444;
-      gap: 10px;
-    }
-
-    .chat-input input {
-      flex: 1;
-      padding: 12px 16px;
-      font-size: 16px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      outline: none;
-    }
-
-    .chat-input button {
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 20px;
-      border: none;
-      background: #25D366;
-      color: white;
-      cursor: pointer;
-    }
-
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.4);
-      z-index: 999;
-    }
-
-    @media (max-width: 768px) {
-      .chat-wrapper {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 80%;
-        transform: translateX(-100%);
-        z-index: 1000;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .menu-toggle {
-        display: inline-block;
-      }
-
-      .overlay.show {
-        display: block;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="chat-wrapper">
-    <aside class="sidebar" id="sidebar">
-      <header class="sidebar-header">
-        <h2>Mesajlaşma</h2>
-        <button id="logoutBtn">Çıkış</button>
-      </header>
-      <div id="userListContainer" class="user-list"></div>
-    </aside>
-
-    <main class="chat-area">
-      <header class="chat-top">
-        <button class="menu-toggle" id="menuToggle">☰</button>
-        <span id="chatTitle">Sohbet seçin</span>
-      </header>
-      <div id="messages" class="chat-messages"></div>
-      <div class="chat-input">
-        <input type="text" id="messageInput" placeholder="Mesaj yaz..." disabled />
-        <button id="sendButton" disabled>📩</button>
-      </div>
-    </main>
-    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
-  </div>
-
-  <!-- Mobil viewport yüksekliği -->
-  <script>
-    function setViewportHeight() {
-      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    }
-    window.addEventListener('resize', setViewportHeight);
-    window.addEventListener('orientationchange', setViewportHeight);
-    setViewportHeight();
-  </script>
-
-  <!-- Firebase Chat Script -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
@@ -278,29 +20,133 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+  </script>
+  <style>
+    :root { --vh: 1vh; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(#141e30, #243b55);
+    }
+    .chat-wrapper { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar {
+      width: 25%; min-width: 220px; background: #111;
+      color: white; display: flex; flex-direction: column;
+      transition: transform 0.3s ease; z-index: 10;
+    }
+    .sidebar-header {
+      padding: 16px; background: #000; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .sidebar-header button {
+      background: #e74c3c; color: white; border: none;
+      padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    }
+    .user-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .user-item {
+      padding: 12px; border-bottom: 1px solid #333;
+      cursor: pointer; color: #ccc;
+    }
+    .user-item:hover { background: #222; color: white; }
 
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userListContainer = document.getElementById('userListContainer');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const messagesEl = document.getElementById('messages');
-    const chatTitle = document.getElementById('chatTitle');
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-
-    menuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('show');
-    });
-
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
+    .chat-area { flex: 1; display: flex; flex-direction: column; color: white; }
+    .chat-top {
+      padding: 16px; background: #000; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .menu-toggle {
+      display: none; background: none; border: none;
+      font-size: 24px; color: white; cursor: pointer;
+    }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column;
+    }
+    .msg-wrapper {
+      display: flex; flex-direction: column; max-width: 70%;
+      margin: 6px 0;
+    }
+    .msg-wrapper.sent { align-self: flex-end; }
+    .msg-wrapper.received { align-self: flex-start; }
+    .msg {
+      padding: 10px 14px; border-radius: 8px;
+      background: #25D366; color: white;
+    }
+    .msg-wrapper.received .msg {
+      background: #fff; color: #111;
+    }
+    .msg-time, .msg-status {
+      font-size: 10px; color: #aaa; margin-top: 4px;
     }
 
+    .chat-input {
+      display: flex; padding: 16px; background: #000;
+      gap: 10px; border-top: 1px solid #333;
+    }
+    .chat-input input {
+      flex: 1; padding: 12px; border-radius: 20px;
+      border: 1px solid #ccc; outline: none;
+    }
+    .chat-input button {
+      padding: 12px 20px; background: #25D366;
+      color: white; border: none; border-radius: 20px; cursor: pointer;
+    }
+
+    .overlay {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+
+    @media (max-width: 768px) {
+      .chat-wrapper { flex-direction: column; }
+      .sidebar {
+        position: fixed; top: 0; left: 0; height: 100%;
+        width: 80%; transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .menu-toggle { display: inline-block; }
+      .overlay.show { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>Mesajlar</h3>
+        <button id="logoutBtn">Çıkış</button>
+      </div>
+      <div id="userListContainer" class="user-list"></div>
+    </aside>
+
+    <main class="chat-area">
+      <div class="chat-top">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <span id="chatTitle">Sohbet seçin</span>
+      </div>
+      <div class="chat-messages" id="messages"></div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Mesaj yaz..." disabled />
+        <button id="sendButton" disabled>Gönder</button>
+      </div>
+    </main>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  </div>
+
+  <script>
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
+
+    document.getElementById('menuToggle').onclick = () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    };
+
     auth.onAuthStateChanged(user => {
-      if (!user) return window.location.href = '/index.html'; // ✅ kök dizine yönleniyor
+      if (!user) return window.location.href = '../index.html';
 
       db.ref('users/' + user.uid).set({
         email: user.email,
@@ -308,80 +154,72 @@
       });
 
       db.ref('users').on('value', snapshot => {
-        userListContainer.innerHTML = '';
         const users = snapshot.val();
+        const container = document.getElementById('userListContainer');
+        container.innerHTML = '';
         for (let uid in users) {
-          const u = users[uid];
           if (uid !== user.uid) {
             const div = document.createElement('div');
             div.className = 'user-item';
-            div.textContent = u.email;
-            div.onclick = () => {
-              openChat(uid, user.uid, u.email);
-              closeSidebar();
-            };
-            userListContainer.appendChild(div);
+            div.textContent = users[uid].email;
+            div.onclick = () => openChat(uid, user.uid, users[uid].email);
+            container.appendChild(div);
           }
         }
       });
 
-      logoutBtn.onclick = () => {
-        auth.signOut().then(() => {
-          window.location.href = '../index.html'; 
-        }).catch(err => alert("Çıkış hatası: " + err.message));
+      document.getElementById('logoutBtn').onclick = () => {
+        auth.signOut().then(() => window.location.href = '../index.html');
       };
 
-      function openChat(otherUid, myUid, otherEmail) {
-        messagesEl.innerHTML = '';
-        chatTitle.textContent = otherEmail;
-        messageInput.disabled = false;
-        sendButton.disabled = false;
-        const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
-        const chatRef = db.ref('chats/' + chatId);
-        chatRef.off();
+      const msgInput = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendButton');
+      const messages = document.getElementById('messages');
+      const chatTitle = document.getElementById('chatTitle');
 
-        chatRef.on('child_added', snap => {
+      function openChat(otherUid, myUid, otherEmail) {
+        const chatId = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+        const ref = db.ref('chats/' + chatId);
+        messages.innerHTML = '';
+        chatTitle.textContent = otherEmail;
+        msgInput.disabled = false;
+        sendBtn.disabled = false;
+
+        ref.off();
+        ref.on('child_added', snap => {
           const msg = snap.val();
-          const key = snap.key;
-          const isSender = msg.sender === user.email;
           const wrapper = document.createElement('div');
-          wrapper.className = 'msg-wrapper ' + (isSender ? 'sent' : 'received');
+          wrapper.className = 'msg-wrapper ' + (msg.sender === user.email ? 'sent' : 'received');
           const bubble = document.createElement('div');
           bubble.className = 'msg';
           bubble.textContent = msg.text;
           const time = document.createElement('div');
           time.className = 'msg-time';
-          time.textContent = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          time.textContent = new Date(msg.timestamp).toLocaleTimeString();
           wrapper.appendChild(bubble);
           wrapper.appendChild(time);
-          if (isSender) {
-            const status = document.createElement('div');
-            status.className = 'msg-status';
-            status.textContent = msg.seen ? "✓✓ Okundu" : "✓ Gönderildi";
-            wrapper.appendChild(status);
-          } else {
-            db.ref('chats/' + chatId + '/' + key).update({ seen: true });
+          messages.appendChild(wrapper);
+          messages.scrollTop = messages.scrollHeight;
+
+          if (msg.sender !== user.email) {
+            db.ref('chats/' + chatId + '/' + snap.key).update({ seen: true });
           }
-          messagesEl.appendChild(wrapper);
-          messagesEl.scrollTop = messagesEl.scrollHeight;
         });
 
-        sendButton.onclick = sendMessage;
-        messageInput.onkeypress = e => {
-          if (e.key === 'Enter') sendMessage();
-        };
-
         function sendMessage() {
-          const text = messageInput.value.trim();
+          const text = msgInput.value.trim();
           if (!text) return;
-          db.ref('chats/' + chatId).push({
+          ref.push({
             sender: user.email,
-            text: text,
+            text,
             timestamp: Date.now(),
             seen: false
           });
-          messageInput.value = '';
+          msgInput.value = '';
         }
+
+        sendBtn.onclick = sendMessage;
+        msgInput.onkeypress = e => { if (e.key === 'Enter') sendMessage(); };
       }
     });
   </script>
