@@ -35,6 +35,7 @@
       color: white;
       border-right: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 1001;
+      transition: transform 0.3s ease;
     }
 
     .sidebar-header {
@@ -44,7 +45,6 @@
       padding: 16px;
       background: rgba(0, 0, 0, 0.6);
       border-bottom: 1px solid #444;
-      gap: 16px;
     }
 
     .sidebar button {
@@ -69,7 +69,6 @@
       cursor: pointer;
       color: #ccc;
       transition: background 0.2s, color 0.2s;
-      font-size: 14px;
     }
 
     .user-item:hover {
@@ -117,7 +116,6 @@
       flex-direction: column;
       max-width: 75%;
       margin: 10px 0;
-      background-color: transparent;
     }
 
     .msg-wrapper.sent {
@@ -133,14 +131,9 @@
       border-radius: 8px 8px 2px 8px;
       font-size: 15px;
       line-height: 1.4;
-      display: inline-block;
-      white-space: pre-wrap;
-      max-width: 70%;
       word-break: break-word;
       background-color: #25D366;
       color: white;
-      align-self: flex-end;
-      position: relative;
       box-shadow: 0 1px 1px rgba(0,0,0,0.1);
     }
 
@@ -155,9 +148,6 @@
       color: #aaa;
       margin-top: 4px;
       padding-left: 8px;
-      padding-right: 8px;
-      align-self: flex-end;
-      background: transparent;
     }
 
     .msg-status {
@@ -245,6 +235,10 @@
       .menu-toggle {
         display: inline-block;
       }
+
+      .overlay.show {
+        display: block;
+      }
     }
   </style>
 </head>
@@ -260,7 +254,7 @@
 
     <main class="chat-area">
       <header class="chat-top" id="chatHeader">
-<button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+        <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
         <span id="chatTitle">Sohbet seçin</span>
       </header>
       <div id="messages" class="chat-messages"></div>
@@ -269,10 +263,12 @@
         <button id="sendButton" disabled>📩</button>
       </div>
     </main>
+
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
+
   <script>
-        const sendButton = document.getElementById('sendButton');
+    const sendButton = document.getElementById('sendButton');
     const messageInput = document.getElementById('messageInput');
     const messagesEl = document.getElementById('messages');
     const chatTitle = document.getElementById('chatTitle');
@@ -290,9 +286,6 @@
       overlay.classList.remove('show');
     }
 
-    menuToggle.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', closeSidebar);
-
     function formatDateLabel(timestamp) {
       const today = new Date();
       const msgDate = new Date(timestamp);
@@ -303,97 +296,97 @@
     }
 
     auth.onAuthStateChanged(user => {
-      if (!user) window.location.href = 'index.html';
-      else {
-        const userListContainer = document.getElementById('userListContainer');
-        db.ref('users/' + user.uid).set({ email: user.email, uid: user.uid });
+      if (!user) return window.location.href = 'index.html';
 
-        db.ref('users').on('value', snapshot => {
-          userListContainer.innerHTML = '';
-          const users = snapshot.val();
-          for (let uid in users) {
-            const u = users[uid];
-            if (uid !== user.uid && u.email && u.uid) {
-              const div = document.createElement('div');
-              div.className = 'user-item';
-              div.textContent = u.email;
-              div.onclick = () => {
-                openChat(u.uid, user.uid, u.email);
-                closeSidebar();
-              };
-              userListContainer.appendChild(div);
-            }
+      const userListContainer = document.getElementById('userListContainer');
+      db.ref('users/' + user.uid).set({ email: user.email, uid: user.uid });
+
+      db.ref('users').on('value', snapshot => {
+        userListContainer.innerHTML = '';
+        const users = snapshot.val();
+        for (let uid in users) {
+          const u = users[uid];
+          if (uid !== user.uid && u.email && u.uid) {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.textContent = u.email;
+            div.onclick = () => {
+              openChat(u.uid, user.uid, u.email);
+              closeSidebar();
+            };
+            userListContainer.appendChild(div);
           }
+        }
+      });
+
+      function openChat(otherUid, myUid, otherEmail) {
+        messagesEl.innerHTML = '';
+        chatTitle.textContent = otherEmail;
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
+        const chatRef = db.ref('chats/' + chatId);
+
+        let lastDate = '';
+
+        chatRef.off();
+        chatRef.on('child_added', snapshot => {
+          const msg = snapshot.val();
+          const key = snapshot.key;
+          const isSender = msg.sender === user.email;
+          const timestamp = new Date(msg.timestamp || Date.now());
+          const currentDate = timestamp.toDateString();
+
+          if (lastDate !== currentDate) {
+            const label = document.createElement('div');
+            label.className = 'date-label';
+            label.textContent = formatDateLabel(timestamp);
+            messagesEl.appendChild(label);
+            lastDate = currentDate;
+          }
+
+          const wrapper = document.createElement('div');
+          wrapper.className = isSender ? 'msg-wrapper sent' : 'msg-wrapper received';
+
+          const bubble = document.createElement('div');
+          bubble.className = 'msg';
+          bubble.textContent = msg.text;
+
+          const time = document.createElement('div');
+          time.className = 'msg-time';
+          time.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          wrapper.appendChild(bubble);
+          wrapper.appendChild(time);
+
+          if (isSender) {
+            const status = document.createElement('div');
+            status.className = 'msg-status';
+            status.textContent = msg.seen ? '✓✓ Okundu' : '✓ Gönderildi';
+            wrapper.appendChild(status);
+          } else {
+            db.ref('chats/' + chatId + '/' + key).update({ seen: true });
+          }
+
+          messagesEl.appendChild(wrapper);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
         });
 
-        function openChat(otherUid, myUid, otherEmail) {
-          messagesEl.innerHTML = '';
-          chatTitle.textContent = otherEmail;
-          messageInput.disabled = false;
-          sendButton.disabled = false;
-          const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
-          const chatRef = db.ref('chats/' + chatId);
+        sendButton.onclick = sendMessage;
+        messageInput.onkeypress = e => {
+          if (e.key === 'Enter') sendMessage();
+        };
 
-          let lastDate = '';
-          chatRef.off();
-          chatRef.on('child_added', snapshot => {
-            const msg = snapshot.val();
-            const key = snapshot.key;
-            const isSender = msg.sender === user.email;
-            const timestamp = new Date(msg.timestamp || Date.now());
-            const currentDate = timestamp.toDateString();
-
-            if (lastDate !== currentDate) {
-              const label = document.createElement('div');
-              label.className = 'date-label';
-              label.textContent = formatDateLabel(timestamp);
-              messagesEl.appendChild(label);
-              lastDate = currentDate;
-            }
-
-            const wrapper = document.createElement('div');
-            wrapper.className = isSender ? 'msg-wrapper sent' : 'msg-wrapper received';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'msg';
-            bubble.textContent = msg.text;
-
-            const time = document.createElement('div');
-            time.className = 'msg-time';
-            time.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            wrapper.appendChild(bubble);
-            wrapper.appendChild(time);
-
-            if (isSender) {
-              const status = document.createElement('div');
-              status.className = 'msg-status';
-              status.textContent = msg.seen ? '✓✓ Okundu' : '✓ Gönderildi';
-              wrapper.appendChild(status);
-            } else {
-              db.ref('chats/' + chatId + '/' + key).update({ seen: true });
-            }
-
-            messagesEl.appendChild(wrapper);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-          });
-
-          sendButton.onclick = sendMessage;
-          messageInput.onkeypress = e => {
-            if (e.key === 'Enter') sendMessage();
-          };
-
-          function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text !== '') {
-              db.ref('chats/' + chatId).push({
-                sender: user.email,
-                text: text,
-                timestamp: Date.now(),
-                seen: false
-              });
-              messageInput.value = '';
-            }
+        function sendMessage() {
+          const text = messageInput.value.trim();
+          if (text !== '') {
+            db.ref('chats/' + chatId).push({
+              sender: user.email,
+              text: text,
+              timestamp: Date.now(),
+              seen: false
+            });
+            messageInput.value = '';
           }
         }
       }
@@ -402,9 +395,6 @@
     function logout() {
       auth.signOut().then(() => window.location.href = 'index.html');
     }
-
   </script>
-
-
 </body>
 </html>
