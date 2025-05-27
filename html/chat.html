@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="/js/firebase.js"></script>
-  <script src="/js/chat.js"></script>
   <style>
     :root {
       --vh: 1vh;
@@ -27,7 +26,6 @@
 
     .chat-wrapper {
       display: flex;
-      flex-direction: row;
       height: calc(var(--vh, 1vh) * 100);
       width: 100%;
       overflow: hidden;
@@ -42,7 +40,6 @@
       color: white;
       border-right: 1px solid rgba(255,255,255,0.1);
       z-index: 1001;
-      transition: transform 0.3s ease;
     }
 
     .sidebar-header {
@@ -214,6 +211,7 @@
         height: 100%;
         width: 80%;
         transform: translateX(-100%);
+        transition: transform 0.3s ease;
         z-index: 1000;
       }
 
@@ -255,7 +253,6 @@
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
 
-  <!-- Mobil viewport yüksekliği -->
   <script>
     function setViewportHeight() {
       document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
@@ -265,18 +262,7 @@
     setViewportHeight();
   </script>
 
-  <!-- Firebase Chat Script -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
-      authDomain: "message-app-e45fa.firebaseapp.com",
-      databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
-      projectId: "message-app-e45fa",
-      storageBucket: "message-app-e45fa.appspot.com",
-      messagingSenderId: "1090017668550",
-      appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
-    };
-    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
@@ -301,7 +287,7 @@
     }
 
     auth.onAuthStateChanged(user => {
-      if (!user) return window.location.href = '/index.html'; // ✅ kök dizine yönleniyor
+      if (!user) return window.location.href = '/index.html';
 
       db.ref('users/' + user.uid).set({
         email: user.email,
@@ -328,7 +314,7 @@
 
       logoutBtn.onclick = () => {
         auth.signOut().then(() => {
-          window.location.href = '../index.html'; 
+          window.location.href = '/index.html';
         }).catch(err => alert("Çıkış hatası: " + err.message));
       };
 
