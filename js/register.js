@@ -1,62 +1,3 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kayıt Ol</title>
-  <link rel="stylesheet" href="login.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="firebase.js"></script>
-  <style>
-    .error-message {
-      background-color: rgba(255, 0, 0, 0.1);
-      color: #f44336;
-      border: 1px solid #f44336;
-      border-radius: 6px;
-      padding: 10px 14px;
-      font-size: 13px;
-      margin-top: 20px;
-      text-align: center;
-      animation: fadeIn 0.3s ease;
-    }
-  </style>
-</head>
-<body>
-  <div class="login-box">
-    <h2>Kayıt Ol</h2>
-    <form onsubmit="register(event)">
-      <div class="user-box">
-        <input type="email" id="email" required onblur="checkEmailExists()" />
-        <label>Email</label>
-      </div>
-      <div class="user-box">
-        <input type="password" id="password" required />
-        <label>Şifre</label>
-      </div>
-      <div class="user-box">
-        <input type="password" id="confirmPassword" required />
-        <label>Şifre (Tekrar)</label>
-      </div>
-       <div id="errorContainer"></div>
-      <a href="#" onclick="register(event)">
-        <span></span><span></span><span></span><span></span>
-        Kayıt Ol
-      </a>
-    </form>
-
-   
-
-     <div class="login-links">
-      <a href="reset.html">Şifremi unuttum</a>
-      <a href="register.html">Hesabınız yok mu? Kayıt olun</a>
-      <a href="login.html">Giriş sayfasına dön</a>
-
-    </div>
-  </div>
-  
-
-  <script>
     function checkEmailExists() {
       const email = document.getElementById('email').value.trim();
       clearErrors();
@@ -130,6 +71,3 @@
           return "Kayıt olurken bir hata oluştu.";
       }
     }
-  </script>
-</body>
-</html>
