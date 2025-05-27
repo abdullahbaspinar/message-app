@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1" />
   <title>Mesajlaşma</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -253,7 +253,7 @@
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
 
-  <!-- Dinamik viewport fix -->
+  <!-- Mobil viewport yüksekliği -->
   <script>
     function setViewportHeight() {
       document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
@@ -263,7 +263,7 @@
     setViewportHeight();
   </script>
 
-  <!-- Firebase + Chat -->
+  <!-- Firebase Chat Script -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
@@ -299,7 +299,7 @@
     }
 
     auth.onAuthStateChanged(user => {
-      if (!user) return window.location.href = 'index.html';
+      if (!user) return window.location.href = '/index.html'; // ✅ kök dizine yönleniyor
 
       db.ref('users/' + user.uid).set({
         email: user.email,
@@ -326,7 +326,7 @@
 
       logoutBtn.onclick = () => {
         auth.signOut().then(() => {
-          window.location.href = 'index.html';
+          window.location.href = '/index.html'; // ✅ çıkınca index.html'e gider
         }).catch(err => alert("Çıkış hatası: " + err.message));
       };
 
