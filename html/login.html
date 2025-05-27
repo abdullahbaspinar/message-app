@@ -60,10 +60,10 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const errorContainer = document.getElementById('errorContainer');
-      errorContainer.innerHTML = ''; // Önceki hatayı temizle
+      errorContainer.innerHTML = ''; 
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => window.location.href = 'chat.html')
+        .then(() => window.location.href = 'html/chat.html')
         .catch(error => {
           const errorBox = document.createElement('div');
           errorBox.className = 'error-message';

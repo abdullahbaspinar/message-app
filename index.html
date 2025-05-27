@@ -40,7 +40,7 @@
       const password = document.getElementById('password').value;
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => window.location.href = 'chat.html')
+        .then(() => window.location.href = 'html/chat.html')
         .catch(error => alert(error.message));
     }
   </script>
