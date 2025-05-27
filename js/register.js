@@ -1,73 +1,81 @@
-    function checkEmailExists() {
-      const email = document.getElementById('email').value.trim();
-      clearErrors();
+function checkEmailExists() {
+  const email = document.getElementById('email').value.trim();
+  clearErrors();
 
-      if (email === '') return;
+  if (email === '') return;
 
-      auth.fetchSignInMethodsForEmail(email)
-        .then(methods => {
-          if (methods.length > 0) {
-            showError("Bu e-posta zaten sistemde kayıtlı.");
-          }
-        })
-        .catch(() => {
-          showError("E-posta kontrolü yapılırken bir hata oluştu.");
-        });
-    }
-
-    function register(e) {
-      e.preventDefault();
-      clearErrors();
-
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return showError("Geçerli bir e-posta adresi girin.");
+  auth.fetchSignInMethodsForEmail(email)
+    .then(methods => {
+      if (methods.length > 0) {
+        showError("Bu e-posta zaten sistemde kayıtlı.");
       }
+    })
+    .catch(() => {
+      showError("E-posta kontrolü yapılırken bir hata oluştu.");
+    });
+}
 
-      if (password !== confirmPassword) {
-        return showError("Şifreler eşleşmiyor.");
-      }
+function register(e) {
+  e.preventDefault();
+  clearErrors();
 
-      const passwordValid = password.length >= 6 &&
-                            /[A-Z]/.test(password) &&
-                            /[0-9]/.test(password);
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
 
-      if (!passwordValid) {
-        return showError("Şifre en az 6 karakter olmalı, en az 1 büyük harf ve 1 sayı içermelidir.");
-      }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return showError("Geçerli bir e-posta adresi girin.");
+  }
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => window.location.href = "chat.html")
-        .catch(error => {
-          const msg = firebaseErrorMessage(error.code);
-          showError(msg);
-        });
-    }
+  if (password !== confirmPassword) {
+    return showError("Şifreler eşleşmiyor.");
+  }
 
-    function showError(message) {
-      const box = document.createElement('div');
-      box.className = 'error-message';
-      box.textContent = message;
-      document.getElementById('errorContainer').appendChild(box);
-    }
+  const passwordValid = password.length >= 6 &&
+                        /[A-Z]/.test(password) &&
+                        /[0-9]/.test(password);
 
-    function clearErrors() {
-      document.getElementById('errorContainer').innerHTML = '';
-    }
+  if (!passwordValid) {
+    return showError("Şifre en az 6 karakter olmalı, en az 1 büyük harf ve 1 sayı içermelidir.");
+  }
 
-    function firebaseErrorMessage(code) {
-      switch (code) {
-        case 'auth/email-already-in-use':
-          return "Bu e-posta adresi zaten kullanılmaktadır. Şifrenizi mi unuttunuz?";
-        case 'auth/invalid-email':
-          return "Geçerli bir e-posta adresi girin.";
-        case 'auth/weak-password':
-          return "Şifre çok zayıf.";
-        default:
-          return "Kayıt olurken bir hata oluştu.";
-      }
-    }
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const user = userCredential.user;
+      return db.ref('users/' + user.uid).set({
+        uid: user.uid,
+        email: user.email
+      }).then(() => {
+        window.location.href = "/html/chat.html";
+      });
+    })
+    .catch(error => {
+      const msg = firebaseErrorMessage(error.code);
+      showError(msg);
+    });
+}
+
+function showError(message) {
+  const box = document.createElement('div');
+  box.className = 'error-message';
+  box.textContent = message;
+  document.getElementById('errorContainer').appendChild(box);
+}
+
+function clearErrors() {
+  document.getElementById('errorContainer').innerHTML = '';
+}
+
+function firebaseErrorMessage(code) {
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return "Bu e-posta adresi zaten kullanılmaktadır. Şifrenizi mi unuttunuz?";
+    case 'auth/invalid-email':
+      return "Geçerli bir e-posta adresi girin.";
+    case 'auth/weak-password':
+      return "Şifre çok zayıf.";
+    default:
+      return "Kayıt olurken bir hata oluştu.";
+  }
+}
