@@ -247,14 +247,14 @@
     <aside class="sidebar" id="sidebar">
       <header class="sidebar-header">
         <h2>Mesajlaşma</h2>
-        <button onclick="logout()">Çıkış</button>
+        <button id="logoutBtn">Çıkış</button>
       </header>
       <div id="userListContainer" class="user-list"></div>
     </aside>
 
     <main class="chat-area">
-      <header class="chat-top" id="chatHeader">
-        <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+      <header class="chat-top">
+        <button class="menu-toggle" id="menuToggle">☰</button>
         <span id="chatTitle">Sohbet seçin</span>
       </header>
       <div id="messages" class="chat-messages"></div>
@@ -263,7 +263,6 @@
         <button id="sendButton" disabled>📩</button>
       </div>
     </main>
-
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
 
@@ -275,6 +274,7 @@
     const sidebar = document.getElementById('sidebar');
     const menuToggle = document.getElementById('menuToggle');
     const overlay = document.getElementById('overlay');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     function toggleSidebar() {
       sidebar.classList.toggle('open');
@@ -285,6 +285,9 @@
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
     }
+
+    menuToggle.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', closeSidebar);
 
     function formatDateLabel(timestamp) {
       const today = new Date();
@@ -299,11 +302,17 @@
       if (!user) return window.location.href = 'index.html';
 
       const userListContainer = document.getElementById('userListContainer');
-      db.ref('users/' + user.uid).set({ email: user.email, uid: user.uid });
+
+      // Kullanıcıyı veritabanına yaz
+      db.ref('users/' + user.uid).set({
+        email: user.email,
+        uid: user.uid
+      });
 
       db.ref('users').on('value', snapshot => {
         userListContainer.innerHTML = '';
         const users = snapshot.val();
+        console.log("Kullanıcılar:", users); // Veriyi kontrol et
         for (let uid in users) {
           const u = users[uid];
           if (uid !== user.uid && u.email && u.uid) {
@@ -328,7 +337,6 @@
         const chatRef = db.ref('chats/' + chatId);
 
         let lastDate = '';
-
         chatRef.off();
         chatRef.on('child_added', snapshot => {
           const msg = snapshot.val();
@@ -390,11 +398,11 @@
           }
         }
       }
-    });
 
-    function logout() {
-      auth.signOut().then(() => window.location.href = 'index.html');
-    }
+      logoutBtn.addEventListener('click', () => {
+        auth.signOut().then(() => window.location.href = 'index.html');
+      });
+    });
   </script>
 </body>
 </html>
