@@ -20,6 +20,15 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+  function setDynamicVh() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  window.addEventListener('resize', setDynamicVh);
+  window.addEventListener('orientationchange', setDynamicVh);
+  window.addEventListener('load', setDynamicVh);
+  setDynamicVh();
+
   </script>
   <style>
     html, body {
@@ -31,10 +40,14 @@
       overflow: hidden;
     }
 
-    .chat-wrapper {
-      display: flex;
-      height: 100vh;
-    }
+ .chat-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: calc(var(--vh, 1vh) * 100); /* 👈 dinamik yüksekliği burada kullan */
+  width: 100%;
+  overflow: hidden;
+}
+
 
     .sidebar {
       width: 260px;
