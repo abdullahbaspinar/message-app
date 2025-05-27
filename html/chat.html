@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1"/>
   <title>Mesajlaşma</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -60,6 +60,7 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 16px;
     }
 
     .user-list {
@@ -172,7 +173,7 @@
     .chat-input input {
       flex: 1;
       padding: 12px 16px;
-      font-size: 15px;
+      font-size: 16px;
       border-radius: 20px;
       border: 1px solid #ccc;
       outline: none;
@@ -180,7 +181,7 @@
 
     .chat-input button {
       padding: 12px 20px;
-      font-size: 18px;
+      font-size: 16px;
       border-radius: 20px;
       border: none;
       background: #25D366;
@@ -252,12 +253,13 @@
     <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
 
-  <!-- Dinamik vh desteği (iOS Safe Area) -->
+  <!-- Dinamik viewport fix -->
   <script>
     function setViewportHeight() {
       document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
     }
     window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
     setViewportHeight();
   </script>
 
