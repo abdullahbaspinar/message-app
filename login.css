@@ -180,3 +180,12 @@ body {
   color: #ffffff;
   text-decoration: underline;
 }
+.user-box input:not(:placeholder-shown) ~ label {
+  top: -20px;
+  left: 0;
+  color: #03e9f4;
+  font-size: 12px;
+}
+
+
+

@@ -8,39 +8,127 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="firebase.js"></script>
+  <style>
+    .error-message {
+      background-color: rgba(255, 0, 0, 0.1);
+      color: #f44336;
+      border: 1px solid #f44336;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+  </style>
 </head>
 <body>
   <div class="login-box">
     <h2>Kayıt Ol</h2>
     <form onsubmit="register(event)">
       <div class="user-box">
-        <input type="email" id="email" required />
+        <input type="email" id="email" required onblur="checkEmailExists()" />
         <label>Email</label>
       </div>
       <div class="user-box">
         <input type="password" id="password" required />
         <label>Şifre</label>
       </div>
+      <div class="user-box">
+        <input type="password" id="confirmPassword" required />
+        <label>Şifre (Tekrar)</label>
+      </div>
+       <div id="errorContainer"></div>
       <a href="#" onclick="register(event)">
         <span></span><span></span><span></span><span></span>
         Kayıt Ol
       </a>
     </form>
 
-    <div class="login-links">
-      <a href="login.html">Zaten hesabınız var mı? Giriş Yap</a>
+   
+
+     <div class="login-links">
+      <a href="reset.html">Şifremi unuttum</a>
+      <a href="register.html">Hesabınız yok mu? Kayıt olun</a>
+      <a href="login.html">Giriş sayfasına dön</a>
+
     </div>
   </div>
+  
 
   <script>
+    function checkEmailExists() {
+      const email = document.getElementById('email').value.trim();
+      clearErrors();
+
+      if (email === '') return;
+
+      auth.fetchSignInMethodsForEmail(email)
+        .then(methods => {
+          if (methods.length > 0) {
+            showError("Bu e-posta zaten sistemde kayıtlı.");
+          }
+        })
+        .catch(() => {
+          showError("E-posta kontrolü yapılırken bir hata oluştu.");
+        });
+    }
+
     function register(e) {
       e.preventDefault();
-      const email = document.getElementById('email').value;
+      clearErrors();
+
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return showError("Geçerli bir e-posta adresi girin.");
+      }
+
+      if (password !== confirmPassword) {
+        return showError("Şifreler eşleşmiyor.");
+      }
+
+      const passwordValid = password.length >= 6 &&
+                            /[A-Z]/.test(password) &&
+                            /[0-9]/.test(password);
+
+      if (!passwordValid) {
+        return showError("Şifre en az 6 karakter olmalı, en az 1 büyük harf ve 1 sayı içermelidir.");
+      }
 
       auth.createUserWithEmailAndPassword(email, password)
         .then(() => window.location.href = "chat.html")
-        .catch(error => alert(error.message));
+        .catch(error => {
+          const msg = firebaseErrorMessage(error.code);
+          showError(msg);
+        });
+    }
+
+    function showError(message) {
+      const box = document.createElement('div');
+      box.className = 'error-message';
+      box.textContent = message;
+      document.getElementById('errorContainer').appendChild(box);
+    }
+
+    function clearErrors() {
+      document.getElementById('errorContainer').innerHTML = '';
+    }
+
+    function firebaseErrorMessage(code) {
+      switch (code) {
+        case 'auth/email-already-in-use':
+          return "Bu e-posta adresi zaten kullanılmaktadır. Şifrenizi mi unuttunuz?";
+        case 'auth/invalid-email':
+          return "Geçerli bir e-posta adresi girin.";
+        case 'auth/weak-password':
+          return "Şifre çok zayıf.";
+        default:
+          return "Kayıt olurken bir hata oluştu.";
+      }
     }
   </script>
 </body>

@@ -8,10 +8,28 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="firebase.js"></script>
+  <style>
+    .error-message {
+      background-color: rgba(255, 0, 0, 0.1);
+      color: #f44336;
+      border: 1px solid #f44336;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <div class="login-box">
-    <h2>Login</h2>
+    <h2>Giriş Yap</h2>
     <form onsubmit="login(event)">
       <div class="user-box">
         <input type="email" id="email" required />
@@ -21,6 +39,9 @@
         <input type="password" id="password" required />
         <label>Password</label>
       </div>
+
+      <div id="errorContainer"></div>
+
       <a href="#" onclick="login(event)">
         <span></span><span></span><span></span><span></span>
         Giriş Yap
@@ -38,10 +59,17 @@
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const errorContainer = document.getElementById('errorContainer');
+      errorContainer.innerHTML = ''; // Önceki hatayı temizle
 
       auth.signInWithEmailAndPassword(email, password)
         .then(() => window.location.href = 'chat.html')
-        .catch(error => alert(error.message));
+        .catch(error => {
+          const errorBox = document.createElement('div');
+          errorBox.className = 'error-message';
+          errorBox.textContent = 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.';
+          errorContainer.appendChild(errorBox);
+        });
     }
   </script>
 </body>

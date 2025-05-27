@@ -7,7 +7,32 @@
   <link rel="stylesheet" href="login.css" />
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
+  <style>
+    .info-box {
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .error-message {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff4d4d;
+      color: #b30000;
+    }
+    .success-message {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #00cc00;
+      color: #006600;
+    }
+    .info-box a {
+      color: #0066cc;
+      text-decoration: underline;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+  </style>
 </head>
 <body>
   <div class="login-box">
@@ -17,11 +42,13 @@
         <input type="email" id="email" required />
         <label>Email</label>
       </div>
+      <div id="messageContainer"></div>
       <a href="#" onclick="resetPassword(event)">
         <span></span><span></span><span></span><span></span>
         Şifreyi Sıfırla
       </a>
     </form>
+
     <div class="login-links">
       <a href="login.html">Giriş sayfasına dön</a>
     </div>
@@ -30,11 +57,57 @@
   <script>
     function resetPassword(e) {
       e.preventDefault();
-      const email = document.getElementById('email').value;
+      clearMessage();
 
-      auth.sendPasswordResetEmail(email)
-        .then(() => alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi."))
-        .catch(error => alert(error.message));
+      const email = document.getElementById('email').value.trim();
+      const messageContainer = document.getElementById('messageContainer');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+        showMessage("Geçerli bir e-posta adresi giriniz.", false);
+        return;
+      }
+
+      db.ref('users').once('value', snapshot => {
+        let exists = false;
+
+        snapshot.forEach(child => {
+          const user = child.val();
+          if (user.email === email) exists = true;
+        });
+
+        if (!exists) {
+          showMessage(
+            "Bu e-posta adresiyle kayıtlı bir kullanıcı bulunamadı. ",
+            false,
+            '<a href="register.html">Hesap oluşturun</a>'
+          );
+          return;
+        }
+
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            showMessage("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.", true);
+          })
+          .catch(error => {
+            if (error.code === 'auth/invalid-email') {
+              showMessage("Geçersiz e-posta adresi girdiniz.", false);
+            } else {
+              showMessage("Bir hata oluştu. Lütfen tekrar deneyiniz.", false);
+            }
+          });
+      });
+    }
+
+    function showMessage(message, success = false, extra = "") {
+      const box = document.createElement('div');
+      box.className = 'info-box ' + (success ? 'success-message' : 'error-message');
+      box.innerHTML = message + (extra || "");
+      document.getElementById('messageContainer').appendChild(box);
+    }
+
+    function clearMessage() {
+      document.getElementById('messageContainer').innerHTML = '';
     }
   </script>
 </body>
