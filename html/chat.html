@@ -7,243 +7,90 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-  <script src="js/firebase.js"></script>
   <style>
+    /* Tüm CSS aynı şekilde buraya gömüldü */
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(#141e30, #243b55);
     }
-
     .chat-wrapper {
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
+      display: flex; flex-direction: row;
+      height: 100vh; width: 100%;
     }
-
     .sidebar {
-      width: 25%;
-      min-width: 220px;
+      width: 25%; min-width: 220px;
       background: rgba(20, 20, 20, 0.95);
-      display: flex;
-      flex-direction: column;
-      color: white;
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; flex-direction: column;
+      color: white; border-right: 1px solid rgba(255,255,255,0.1);
       z-index: 1001;
-      transition: transform 0.3s ease;
     }
-
     .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 16px;
       background: rgba(0, 0, 0, 0.6);
       border-bottom: 1px solid #444;
     }
-
     .sidebar button {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
+      background-color: #e74c3c; color: white;
+      border: none; padding: 6px 12px;
+      border-radius: 8px; cursor: pointer; font-weight: bold;
     }
-
     .user-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
+      flex: 1; overflow-y: auto; padding: 12px;
     }
-
     .user-item {
-      padding: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      cursor: pointer;
+      padding: 12px; cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       color: #ccc;
-      transition: background 0.2s, color 0.2s;
     }
-
     .user-item:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-      color: #fff;
+      background: rgba(255,255,255,0.05); color: #fff;
     }
-
     .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: rgba(0,0,0,0.4);
-      color: white;
-      height: 100%;
+      flex: 1; display: flex; flex-direction: column;
+      background: rgba(0,0,0,0.4); color: white; height: 100%;
     }
-
     .chat-top {
-      padding: 20px;
-      font-weight: bold;
-      background: rgba(0,0,0,0.3);
-      border-bottom: 1px solid #444;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 20px; font-weight: bold;
+      background: rgba(0,0,0,0.3); border-bottom: 1px solid #444;
+      display: flex; justify-content: space-between; align-items: center;
     }
-
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: white;
-    }
-
     .chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
+      flex: 1; padding: 20px; overflow-y: auto;
+      display: flex; flex-direction: column;
     }
-
-    .msg-wrapper {
-      display: flex;
-      flex-direction: column;
-      max-width: 75%;
-      margin: 10px 0;
-    }
-
-    .msg-wrapper.sent {
-      align-self: flex-end;
-    }
-
-    .msg-wrapper.received {
-      align-self: flex-start;
-    }
-
+    .msg-wrapper { max-width: 75%; margin: 10px 0; display: flex; flex-direction: column; }
+    .sent { align-self: flex-end; }
+    .received { align-self: flex-start; }
     .msg {
-      padding: 10px 14px;
-      border-radius: 8px 8px 2px 8px;
-      font-size: 15px;
-      line-height: 1.4;
-      word-break: break-word;
-      background-color: #25D366;
-      color: white;
-      box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 15px; word-break: break-word;
+      background: #25D366; color: white;
     }
-
-    .msg-wrapper.received .msg {
-      background-color: #ffffff;
-      color: #222;
-      border-radius: 8px 8px 8px 2px;
-    }
-
-    .msg-time {
-      font-size: 11px;
+    .received .msg { background: white; color: #222; }
+    .msg-time, .msg-status {
+      font-size: 11px; margin-top: 4px;
       color: #aaa;
-      margin-top: 4px;
-      padding-left: 8px;
     }
-
-    .msg-status {
-      font-size: 10px;
-      color: #999;
-      margin-top: 2px;
-      align-self: flex-end;
-      padding-right: 8px;
-    }
-
-    .date-label {
-      text-align: center;
-      font-size: 13px;
-      color: #ccc;
-      margin: 16px 0 8px;
-    }
-
     .chat-input {
-      display: flex;
-      padding: 16px;
-      background: rgba(0,0,0,0.3);
-      border-top: 1px solid #444;
-      gap: 10px;
+      display: flex; padding: 16px; gap: 10px;
+      background: rgba(0,0,0,0.3); border-top: 1px solid #444;
     }
-
     .chat-input input {
-      flex: 1;
-      padding: 12px 16px;
-      font-size: 15px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      outline: none;
+      flex: 1; padding: 12px; font-size: 15px;
+      border-radius: 20px; border: 1px solid #ccc; outline: none;
     }
-
     .chat-input button {
-      padding: 12px 20px;
-      font-size: 18px;
-      border-radius: 20px;
-      border: none;
-      background: #25D366;
-      color: white;
-      cursor: pointer;
-    }
-
-    .chat-input button:hover {
-      background: #1ebe5f;
-    }
-
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.4);
-      z-index: 999;
-    }
-
-    .sidebar.open ~ .overlay {
-      display: block;
-    }
-
-    @media (max-width: 768px) {
-      .chat-wrapper {
-        flex-direction: column;
-        height: 100dvh;
-      }
-
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 80%;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .menu-toggle {
-        display: inline-block;
-      }
-
-      .overlay.show {
-        display: block;
-      }
+      padding: 12px 20px; font-size: 18px;
+      border-radius: 20px; border: none;
+      background: #25D366; color: white; cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="chat-wrapper">
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
       <header class="sidebar-header">
         <h2>Mesajlaşma</h2>
         <button id="logoutBtn">Çıkış</button>
@@ -253,7 +100,6 @@
 
     <main class="chat-area">
       <header class="chat-top">
-        <button class="menu-toggle" id="menuToggle">☰</button>
         <span id="chatTitle">Sohbet seçin</span>
       </header>
       <div id="messages" class="chat-messages"></div>
@@ -262,67 +108,60 @@
         <button id="sendButton" disabled>📩</button>
       </div>
     </main>
-    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
   </div>
 
   <script>
-    const sendButton = document.getElementById('sendButton');
-    const messageInput = document.getElementById('messageInput');
-    const messagesEl = document.getElementById('messages');
-    const chatTitle = document.getElementById('chatTitle');
-    const sidebar = document.getElementById('sidebar');
-    const menuToggle = document.getElementById('menuToggle');
-    const overlay = document.getElementById('overlay');
+    // firebase.js içeriği doğrudan entegre
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
+      authDomain: "message-app-e45fa.firebaseapp.com",
+      databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
+      projectId: "message-app-e45fa",
+      storageBucket: "message-app-e45fa.appspot.com",
+      messagingSenderId: "1090017668550",
+      appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
     const logoutBtn = document.getElementById('logoutBtn');
     const userListContainer = document.getElementById('userListContainer');
-
-    function toggleSidebar() {
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('show');
-    }
-
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
-    }
-
-    menuToggle.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', closeSidebar);
-
-    function formatDateLabel(timestamp) {
-      const today = new Date();
-      const msgDate = new Date(timestamp);
-      const diff = today.setHours(0, 0, 0, 0) - msgDate.setHours(0, 0, 0, 0);
-      if (diff === 0) return 'Bugün';
-      if (diff === 86400000) return 'Dün';
-      return msgDate.toLocaleDateString('tr-TR');
-    }
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messagesEl = document.getElementById('messages');
+    const chatTitle = document.getElementById('chatTitle');
 
     auth.onAuthStateChanged(user => {
       if (!user) return window.location.href = 'html/login.html';
 
+      // Kullanıcıyı kayıt et
       db.ref('users/' + user.uid).set({
         email: user.email,
         uid: user.uid
       });
 
+      // Kullanıcıları listele
       db.ref('users').on('value', snapshot => {
         userListContainer.innerHTML = '';
         const users = snapshot.val();
         for (let uid in users) {
           const u = users[uid];
-          if (uid !== user.uid && u.email && u.uid) {
+          if (uid !== user.uid) {
             const div = document.createElement('div');
             div.className = 'user-item';
             div.textContent = u.email;
-            div.onclick = () => {
-              openChat(u.uid, user.uid, u.email);
-              closeSidebar();
-            };
+            div.onclick = () => openChat(uid, user.uid, u.email);
             userListContainer.appendChild(div);
           }
         }
       });
+
+      logoutBtn.onclick = () => {
+        auth.signOut().then(() => {
+          window.location.href = 'html/login.html';
+        }).catch(err => alert("Çıkış hatası: " + err.message));
+      };
 
       function openChat(otherUid, myUid, otherEmail) {
         messagesEl.innerHTML = '';
@@ -331,47 +170,30 @@
         sendButton.disabled = false;
         const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
         const chatRef = db.ref('chats/' + chatId);
-
-        let lastDate = '';
         chatRef.off();
-        chatRef.on('child_added', snapshot => {
-          const msg = snapshot.val();
-          const key = snapshot.key;
+
+        chatRef.on('child_added', snap => {
+          const msg = snap.val();
+          const key = snap.key;
           const isSender = msg.sender === user.email;
-          const timestamp = new Date(msg.timestamp || Date.now());
-          const currentDate = timestamp.toDateString();
-
-          if (lastDate !== currentDate) {
-            const label = document.createElement('div');
-            label.className = 'date-label';
-            label.textContent = formatDateLabel(timestamp);
-            messagesEl.appendChild(label);
-            lastDate = currentDate;
-          }
-
           const wrapper = document.createElement('div');
-          wrapper.className = isSender ? 'msg-wrapper sent' : 'msg-wrapper received';
-
+          wrapper.className = 'msg-wrapper ' + (isSender ? 'sent' : 'received');
           const bubble = document.createElement('div');
           bubble.className = 'msg';
           bubble.textContent = msg.text;
-
           const time = document.createElement('div');
           time.className = 'msg-time';
-          time.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+          time.textContent = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
           wrapper.appendChild(bubble);
           wrapper.appendChild(time);
-
           if (isSender) {
             const status = document.createElement('div');
             status.className = 'msg-status';
-            status.textContent = msg.seen ? '✓✓ Okundu' : '✓ Gönderildi';
+            status.textContent = msg.seen ? "✓✓ Okundu" : "✓ Gönderildi";
             wrapper.appendChild(status);
           } else {
             db.ref('chats/' + chatId + '/' + key).update({ seen: true });
           }
-
           messagesEl.appendChild(wrapper);
           messagesEl.scrollTop = messagesEl.scrollHeight;
         });
@@ -383,23 +205,16 @@
 
         function sendMessage() {
           const text = messageInput.value.trim();
-          if (text !== '') {
-            db.ref('chats/' + chatId).push({
-              sender: user.email,
-              text: text,
-              timestamp: Date.now(),
-              seen: false
-            });
-            messageInput.value = '';
-          }
+          if (!text) return;
+          db.ref('chats/' + chatId).push({
+            sender: user.email,
+            text: text,
+            timestamp: Date.now(),
+            seen: false
+          });
+          messageInput.value = '';
         }
       }
-
-      logoutBtn.addEventListener('click', () => {
-        auth.signOut()
-          .then(() => window.location.href = 'html/login.html')
-          .catch(error => alert('Çıkış yapılamadı: ' + error.message));
-      });
     });
   </script>
 </body>
