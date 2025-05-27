@@ -1,130 +1,117 @@
-    const sendButton = document.getElementById('sendButton');
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfjN1tbMatLamGZNqRZZcdvoM8Vbx0RlM",
+      authDomain: "message-app-e45fa.firebaseapp.com",
+      databaseURL: "https://message-app-e45fa-default-rtdb.firebaseio.com",
+      projectId: "message-app-e45fa",
+      storageBucket: "message-app-e45fa.appspot.com",
+      messagingSenderId: "1090017668550",
+      appId: "1:1090017668550:web:e5f1a12735a3315648d6c7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+  function setDynamicVh() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  window.addEventListener('resize', setDynamicVh);
+  window.addEventListener('orientationchange', setDynamicVh);
+  window.addEventListener('load', setDynamicVh);
+  setDynamicVh();
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userListContainer = document.getElementById('userListContainer');
     const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
     const messagesEl = document.getElementById('messages');
     const chatTitle = document.getElementById('chatTitle');
-    const sidebar = document.getElementById('sidebar');
     const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
 
-    function toggleSidebar() {
+    menuToggle.onclick = () => {
       sidebar.classList.toggle('open');
       overlay.classList.toggle('show');
-    }
+    };
 
     function closeSidebar() {
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
     }
 
-    menuToggle.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', closeSidebar);
-
-    function formatDateLabel(timestamp) {
-      const today = new Date();
-      const msgDate = new Date(timestamp);
-      const diff = today.setHours(0, 0, 0, 0) - msgDate.setHours(0, 0, 0, 0);
-      if (diff === 0) return 'Bugün';
-      if (diff === 86400000) return 'Dün';
-      return msgDate.toLocaleDateString('tr-TR');
-    }
-
     auth.onAuthStateChanged(user => {
-      if (!user) window.location.href = 'index.html';
-      else {
-        const userListContainer = document.getElementById('userListContainer');
-        db.ref('users/' + user.uid).set({ email: user.email, uid: user.uid });
+      if (!user) return location.href = '../index.html';
 
-        db.ref('users').on('value', snapshot => {
-          userListContainer.innerHTML = '';
-          const users = snapshot.val();
-          for (let uid in users) {
-            const u = users[uid];
-            if (uid !== user.uid && u.email && u.uid) {
-              const div = document.createElement('div');
-              div.className = 'user-item';
-              div.textContent = u.email;
-              div.onclick = () => {
-                openChat(u.uid, user.uid, u.email);
-                closeSidebar();
-              };
-              userListContainer.appendChild(div);
-            }
+      db.ref('users/' + user.uid).set({
+        email: user.email,
+        uid: user.uid
+      });
+
+      db.ref('users').on('value', snapshot => {
+        userListContainer.innerHTML = '';
+        const users = snapshot.val();
+        for (let uid in users) {
+          if (uid !== user.uid) {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.textContent = users[uid].email;
+            div.onclick = () => {
+              openChat(uid, user.uid, users[uid].email);
+              closeSidebar();
+            };
+            userListContainer.appendChild(div);
           }
+        }
+      });
+
+      logoutBtn.onclick = () => {
+        auth.signOut().then(() => location.href = '../index.html');
+      };
+
+      function openChat(otherUid, myUid, otherEmail) {
+        messagesEl.innerHTML = '';
+        chatTitle.textContent = otherEmail;
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+
+        const chatId = myUid < otherUid ? `${myUid}_${otherUid}` : `${otherUid}_${myUid}`;
+        const chatRef = db.ref('chats/' + chatId);
+
+        chatRef.off();
+        chatRef.on('child_added', snap => {
+          const msg = snap.val();
+          const isSender = msg.sender === user.email;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'msg-wrapper ' + (isSender ? 'sent' : 'received');
+          const bubble = document.createElement('div');
+          bubble.className = 'msg';
+          bubble.textContent = msg.text;
+          const time = document.createElement('div');
+          time.className = 'msg-time';
+          time.textContent = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          wrapper.appendChild(bubble);
+          wrapper.appendChild(time);
+          messagesEl.appendChild(wrapper);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+
+          if (!isSender) db.ref('chats/' + chatId + '/' + snap.key).update({ seen: true });
         });
 
-        function openChat(otherUid, myUid, otherEmail) {
-          messagesEl.innerHTML = '';
-          chatTitle.textContent = otherEmail;
-          messageInput.disabled = false;
-          sendButton.disabled = false;
-          const chatId = myUid < otherUid ? myUid + '_' + otherUid : otherUid + '_' + myUid;
-          const chatRef = db.ref('chats/' + chatId);
+        sendButton.onclick = sendMessage;
+        messageInput.onkeypress = e => {
+          if (e.key === 'Enter') sendMessage();
+        };
 
-          let lastDate = '';
-          chatRef.off();
-          chatRef.on('child_added', snapshot => {
-            const msg = snapshot.val();
-            const key = snapshot.key;
-            const isSender = msg.sender === user.email;
-            const timestamp = new Date(msg.timestamp || Date.now());
-            const currentDate = timestamp.toDateString();
-
-            if (lastDate !== currentDate) {
-              const label = document.createElement('div');
-              label.className = 'date-label';
-              label.textContent = formatDateLabel(timestamp);
-              messagesEl.appendChild(label);
-              lastDate = currentDate;
-            }
-
-            const wrapper = document.createElement('div');
-            wrapper.className = isSender ? 'msg-wrapper sent' : 'msg-wrapper received';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'msg';
-            bubble.textContent = msg.text;
-
-            const time = document.createElement('div');
-            time.className = 'msg-time';
-            time.textContent = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            wrapper.appendChild(bubble);
-            wrapper.appendChild(time);
-
-            if (isSender) {
-              const status = document.createElement('div');
-              status.className = 'msg-status';
-              status.textContent = msg.seen ? '✓✓ Okundu' : '✓ Gönderildi';
-              wrapper.appendChild(status);
-            } else {
-              db.ref('chats/' + chatId + '/' + key).update({ seen: true });
-            }
-
-            messagesEl.appendChild(wrapper);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
+        function sendMessage() {
+          const text = messageInput.value.trim();
+          if (!text) return;
+          db.ref('chats/' + chatId).push({
+            sender: user.email,
+            text: text,
+            timestamp: Date.now(),
+            seen: false
           });
-
-          sendButton.onclick = sendMessage;
-          messageInput.onkeypress = e => {
-            if (e.key === 'Enter') sendMessage();
-          };
-
-          function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text !== '') {
-              db.ref('chats/' + chatId).push({
-                sender: user.email,
-                text: text,
-                timestamp: Date.now(),
-                seen: false
-              });
-              messageInput.value = '';
-            }
-          }
+          messageInput.value = '';
         }
       }
     });
-
-    function logout() {
-      auth.signOut().then(() => window.location.href = 'index.html');
-    }
