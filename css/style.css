@@ -181,3 +181,29 @@
         flex-direction: column;
       }
     }
+    .chat-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+.chat-input {
+  position: sticky;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid #444;
+  display: flex;
+  padding: 16px;
+  gap: 10px;
+}
+
