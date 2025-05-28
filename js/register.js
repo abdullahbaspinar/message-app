@@ -47,7 +47,10 @@ function register(e) {
         uid: user.uid,
         email: user.email
       }).then(() => {
-        window.location.href = "/html/chat.html";
+        showSuccess("Kayıt başarılı! Yönlendiriliyorsunuz...");
+        setTimeout(() => {
+          window.location.href = "/html/chat.html";
+        }, 2000);
       });
     })
     .catch(error => {
@@ -59,6 +62,13 @@ function register(e) {
 function showError(message) {
   const box = document.createElement('div');
   box.className = 'error-message';
+  box.textContent = message;
+  document.getElementById('errorContainer').appendChild(box);
+}
+
+function showSuccess(message) {
+  const box = document.createElement('div');
+  box.className = 'success-message';
   box.textContent = message;
   document.getElementById('errorContainer').appendChild(box);
 }
