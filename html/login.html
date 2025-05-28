@@ -63,7 +63,7 @@
       errorContainer.innerHTML = ''; 
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => window.location.href = 'html/chat.html')
+        .then(() => window.location.href = '/html/chat.html')
         .catch(error => {
           const errorBox = document.createElement('div');
           errorBox.className = 'error-message';
