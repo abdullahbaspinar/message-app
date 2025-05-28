@@ -94,3 +94,5 @@ function firebaseErrorMessage(code) {
       return "Kayıt olurken bir hata oluştu.";
   }
 }
+window.register = register;
+window.checkEmailExists = checkEmailExists;
