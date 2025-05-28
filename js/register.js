@@ -1,3 +1,7 @@
+// Firebase Auth ve Database objeleri
+const auth = firebase.auth();
+const db = firebase.database();
+
 function checkEmailExists() {
   const email = document.getElementById('email').value.trim();
   clearErrors();
@@ -50,10 +54,11 @@ function register(e) {
         showSuccess("Kayıt başarılı! Yönlendiriliyorsunuz...");
         setTimeout(() => {
           window.location.href = "/html/chat.html";
-        }, 2000);
+        }, 1500);
       });
     })
     .catch(error => {
+      console.error("Kayıt Hatası:", error);
       const msg = firebaseErrorMessage(error.code);
       showError(msg);
     });
